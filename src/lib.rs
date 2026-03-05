@@ -7,7 +7,7 @@ pub mod settings;
 pub mod logger;
 pub mod startup;
 
-pub const VERSION: &str = "1.26.0303.03";
+pub const VERSION: &str = "1.26.0503.01";
 // Version Naming:         V.YY.DDMM.SV
 // VV: Version
 // YY: Year

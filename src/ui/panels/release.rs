@@ -10,8 +10,21 @@ struct ReleaseEntry {
 
 const RELEASES: &[ReleaseEntry] = &[
     ReleaseEntry {
+        version: "1.26.0503.01",
+        date: "05/03/2026",
+        additions: &[
+            "Nothing"
+        ],
+        fixes: &[
+            "Change version format to European format instead of US format (MMDD -> DDMM)"
+        ],
+        improvements: &[
+            "Nothing"
+        ],
+    },
+    ReleaseEntry {
         version: "1.26.0303.03",
-        date: "2026-03-03",
+        date: "03/03/2026",
         additions: &[
             "New 'Release' tab to track changes",
             "Added Support & Contribution panel with Crypto donations",
@@ -25,7 +38,7 @@ const RELEASES: &[ReleaseEntry] = &[
     },
     ReleaseEntry {
         version: "1.26.0301.05",
-        date: "2026-03-01",
+        date: "01/03/2026",
         additions: &[
             "New 'Websocket Server' settings in 'Settings' tab",
         ],
