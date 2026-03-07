@@ -1,12 +1,16 @@
-use eframe::egui;
 use crate::app::state::TabletMapperApp;
 use crate::domain::MappingConfig;
 use crate::ui::theme::ui_section_header;
+use eframe::egui;
 
-pub fn render_settings_panel(_app: &TabletMapperApp, ui: &mut egui::Ui, config: &mut MappingConfig) {
+pub fn render_settings_panel(
+    _app: &TabletMapperApp,
+    ui: &mut egui::Ui,
+    config: &mut MappingConfig,
+) {
     ui.add_space(10.0);
     ui_section_header(ui, "General Settings");
-    
+
     let frame = egui::Frame::group(ui.style())
         .fill(egui::Color32::from_gray(250))
         .stroke(egui::Stroke::new(1.0, egui::Color32::from_gray(220)))
@@ -14,15 +18,23 @@ pub fn render_settings_panel(_app: &TabletMapperApp, ui: &mut egui::Ui, config: 
 
     frame.show(ui, |ui| {
         ui.set_width(ui.available_width());
-        
+
         let old_run_at_startup = config.run_at_startup;
-        if ui.checkbox(&mut config.run_at_startup, "Run at startup").on_hover_text("Automatically launch the application when Windows starts.").changed() {
+        if ui
+            .checkbox(&mut config.run_at_startup, "Run at startup")
+            .on_hover_text("Automatically launch the application when Windows starts.")
+            .changed()
+        {
             if let Err(e) = crate::startup::set_run_at_startup(config.run_at_startup) {
                 log::error!(target: "App", "Failed to update startup setting: {}", e);
                 // Revert if it failed
                 config.run_at_startup = old_run_at_startup;
             }
         }
+
+        ui.add_space(5.0);
+        ui.checkbox(&mut config.enable_telemetry, "Send anonymous telemetry")
+            .on_hover_text("Help improve the driver by sending anonymous usage and hardware data.");
     });
 
     ui.add_space(10.0);
@@ -34,11 +46,13 @@ pub fn render_settings_panel(_app: &TabletMapperApp, ui: &mut egui::Ui, config: 
 
     ws_frame.show(ui, |ui| {
         ui.set_width(ui.available_width());
-        
+
         ui.horizontal(|ui| {
             ui.checkbox(&mut config.websocket.enabled, "Enable WebSocket Server");
             if config.websocket.enabled {
-                ui.label(egui::RichText::new("● Running").color(egui::Color32::from_rgb(0, 200, 0)));
+                ui.label(
+                    egui::RichText::new("● Running").color(egui::Color32::from_rgb(0, 200, 0)),
+                );
             } else {
                 ui.label(egui::RichText::new("○ Stopped").color(egui::Color32::GRAY));
             }
@@ -48,9 +62,9 @@ pub fn render_settings_panel(_app: &TabletMapperApp, ui: &mut egui::Ui, config: 
             ui.horizontal(|ui| {
                 ui.label("Port:");
                 ui.add(egui::DragValue::new(&mut config.websocket.port).range(1024..=65535));
-                
+
                 ui.add_space(20.0);
-                
+
                 ui.label("Polling Rate (Hz):");
                 ui.add(egui::DragValue::new(&mut config.websocket.polling_rate_hz).range(1..=1000));
             });

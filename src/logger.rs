@@ -38,6 +38,7 @@ impl Log for GlobalLogger {
                 "TabletDriver",
                 "WS",
                 "Update",
+                "Telemetry",
             ];
             let is_allowed =
                 allowed_targets.contains(&target) || target.starts_with("TabletDriver");

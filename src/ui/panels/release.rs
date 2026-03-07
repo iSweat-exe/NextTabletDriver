@@ -13,7 +13,8 @@ const RELEASES: &[ReleaseEntry] = &[
         version: "1.26.0503.01",
         date: "05/03/2026",
         additions: &[
-            "Nothing"
+            "Add: Telemetry System for improvement (you can disable it in 'Settings' tab)",
+            "Info: The telemetry doesn't collect any personally identifiable information; it’s only there to improve the driver. An example of the shared data is available to view on GitHub."
         ],
         fixes: &[
             "Change version format to European format instead of US format (MMDD -> DDMM)"

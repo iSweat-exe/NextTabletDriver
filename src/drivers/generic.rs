@@ -1,14 +1,16 @@
-use super::{TabletData, TabletDriver};
 use super::config::TabletConfiguration;
-use super::parsers::{xp_pen, wacom, huion, veikk, fallback};
+use super::parsers::{fallback, huion, veikk, wacom, xp_pen};
+use super::{TabletData, TabletDriver};
 
 pub struct GenericTabletDriver {
     config: TabletConfiguration,
+    vid: u16,
+    pid: u16,
 }
 
 impl GenericTabletDriver {
-    pub fn new(config: TabletConfiguration) -> Self {
-        Self { config }
+    pub fn new(config: TabletConfiguration, vid: u16, pid: u16) -> Self {
+        Self { config, vid, pid }
     }
 }
 
@@ -32,31 +34,38 @@ impl TabletDriver for GenericTabletDriver {
         )
     }
 
+    fn get_vid_pid(&self) -> (u16, u16) {
+        (self.vid, self.pid)
+    }
+
     fn parse(&self, data: &[u8]) -> Option<TabletData> {
         // Find the active parser. In OTD, this is per digitizer, but for now we assume one active generic driver instance covers one device.
         // We look at the first digitizer identifier's parser string to decide the parsing logic.
         // A more robust system would map this string to a trait object or function pointer table.
-        
-        let parser_name = self.config.digitizer_identifiers.first()
+
+        let parser_name = self
+            .config
+            .digitizer_identifiers
+            .first()
             .map(|d| d.report_parser.as_str())
             .unwrap_or("");
-            
+
         // Check for simplified matches or exact OTD strings
         if parser_name.contains("XP_PenReportParser") {
-             return xp_pen::star_g640::parse(data);
+            return xp_pen::star_g640::parse(data);
         } else if parser_name.contains("Wacom.Intuos.IntuosReportParser") {
-             return wacom::intuos::parse_intuos(data);
+            return wacom::intuos::parse_intuos(data);
         } else if parser_name.contains("Wacom.Intuos.WacomDriverIntuosReportParser") {
-             return wacom::intuos::parse_wacom_driver_intuos(data);
+            return wacom::intuos::parse_wacom_driver_intuos(data);
         } else if parser_name.contains("Wacom.Bamboo.BambooReportParser") {
-             return wacom::bamboo::parse_bamboo(data);
+            return wacom::bamboo::parse_bamboo(data);
         } else if parser_name.contains("Inspiroy") || parser_name.contains("Giano") {
-             return huion::inspiroy::parse(data);
+            return huion::inspiroy::parse(data);
         } else if parser_name.contains("Veikk") {
-             return veikk::generic::parse(data);
+            return veikk::generic::parse(data);
         } else if parser_name.contains("Gaomon") || parser_name.contains("Tablet") {
-             // Try fallback for these as they often share the ODM layout
-             return fallback::parse(data);
+            // Try fallback for these as they often share the ODM layout
+            return fallback::parse(data);
         }
 
         match parser_name {

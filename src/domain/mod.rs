@@ -1,12 +1,11 @@
-
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ActiveArea {
-    pub x: f32, // Millimeters
-    pub y: f32, // Millimeters
-    pub w: f32, // Millimeters
-    pub h: f32, // Millimeters
+    pub x: f32,        // Millimeters
+    pub y: f32,        // Millimeters
+    pub w: f32,        // Millimeters
+    pub h: f32,        // Millimeters
     pub rotation: f32, // Degrees
 }
 
@@ -18,15 +17,30 @@ pub struct TargetArea {
     pub h: f32, // Pixels
 }
 
-
-fn default_threshold() -> u16 { 10 }
-fn default_false() -> bool { false }
-fn default_true() -> bool { true }
-fn default_tip_binding() -> String { "Mouse Button Binding: (Button: Left)".to_string() }
-fn default_eraser_binding() -> String { "None".to_string() }
-fn default_button_bindings() -> Vec<String> { vec!["None".to_string(), "None".to_string()] }
-fn default_ws_port() -> u16 { 8080 }
-fn default_ws_hz() -> u32 { 60 }
+fn default_threshold() -> u16 {
+    10
+}
+fn default_false() -> bool {
+    false
+}
+fn default_true() -> bool {
+    true
+}
+fn default_tip_binding() -> String {
+    "Mouse Button Binding: (Button: Left)".to_string()
+}
+fn default_eraser_binding() -> String {
+    "None".to_string()
+}
+fn default_button_bindings() -> Vec<String> {
+    vec!["None".to_string(), "None".to_string()]
+}
+fn default_ws_port() -> u16 {
+    8080
+}
+fn default_ws_hz() -> u32 {
+    60
+}
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct WebSocketConfig {
@@ -80,6 +94,8 @@ pub struct MappingConfig {
     pub pen_button_bindings: Vec<String>,
     #[serde(default = "default_false")]
     pub run_at_startup: bool,
+    #[serde(default = "default_true")]
+    pub enable_telemetry: bool,
     #[serde(default)]
     pub websocket: WebSocketConfig,
 }

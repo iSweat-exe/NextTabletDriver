@@ -1,8 +1,8 @@
 use hidapi::{HidApi, HidDevice};
+use include_dir::{include_dir, Dir, DirEntry};
+use std::collections::HashSet;
 use std::fs;
 use std::path::Path;
-use std::collections::HashSet;
-use include_dir::{include_dir, Dir, DirEntry};
 
 pub mod config;
 pub mod generic;
@@ -30,6 +30,7 @@ pub trait TabletDriver {
     fn get_name(&self) -> &str;
     fn get_specs(&self) -> (f32, f32, f32); // Max X, Max Y, Max Pressure
     fn get_physical_specs(&self) -> (f32, f32); // Physical Width (mm), Physical Height (mm)
+    fn get_vid_pid(&self) -> (u16, u16);
     fn parse(&self, data: &[u8]) -> Option<TabletData>;
 }
 
@@ -58,7 +59,11 @@ fn load_configurations() -> Vec<TabletConfiguration> {
 }
 
 /// Parcourt récursivement les dossiers EMBARQUÉS (fix pour les sous-dossiers de marques)
-fn load_embedded_recursive(dir: &Dir, configs: &mut Vec<TabletConfiguration>, names: &mut HashSet<String>) {
+fn load_embedded_recursive(
+    dir: &Dir,
+    configs: &mut Vec<TabletConfiguration>,
+    names: &mut HashSet<String>,
+) {
     for entry in dir.entries() {
         match entry {
             DirEntry::Dir(sub_dir) => {
@@ -67,7 +72,8 @@ fn load_embedded_recursive(dir: &Dir, configs: &mut Vec<TabletConfiguration>, na
             DirEntry::File(file) => {
                 if file.path().extension().and_then(|s| s.to_str()) == Some("json") {
                     if let Some(content_str) = file.contents_utf8() {
-                        if let Ok(config) = serde_json::from_str::<TabletConfiguration>(content_str) {
+                        if let Ok(config) = serde_json::from_str::<TabletConfiguration>(content_str)
+                        {
                             if !names.contains(&config.name) {
                                 log::debug!(target: "Config", "Loaded embedded config: {}", config.name);
                                 configs.push(config);
@@ -83,7 +89,11 @@ fn load_embedded_recursive(dir: &Dir, configs: &mut Vec<TabletConfiguration>, na
 }
 
 /// Parcourt récursivement les dossiers sur le DISQUE
-fn load_from_disk_recursive(path: &Path, configs: &mut Vec<TabletConfiguration>, names: &mut HashSet<String>) {
+fn load_from_disk_recursive(
+    path: &Path,
+    configs: &mut Vec<TabletConfiguration>,
+    names: &mut HashSet<String>,
+) {
     if let Ok(entries) = fs::read_dir(path) {
         for entry in entries.flatten() {
             let p = entry.path();
@@ -102,22 +112,24 @@ fn load_from_disk_recursive(path: &Path, configs: &mut Vec<TabletConfiguration>,
     }
 }
 
-pub fn detect_tablet(api: &HidApi) -> Option<(HidDevice, Box<dyn TabletDriver>)> {
+pub fn detect_tablet(api: &HidApi) -> Option<(HidDevice, Box<dyn TabletDriver>, u16, u16)> {
     let start = std::time::Instant::now();
     log::debug!(target: "Detect", "Starting tablet detection...");
-    
+
     let configs = &*LOADED_CONFIGS;
     let devices: Vec<_> = api.device_list().collect();
 
     for config in configs {
         for digitizer in &config.digitizer_identifiers {
             for device_info in &devices {
-                if device_info.vendor_id() == digitizer.vendor_id && device_info.product_id() == digitizer.product_id {
+                if device_info.vendor_id() == digitizer.vendor_id
+                    && device_info.product_id() == digitizer.product_id
+                {
                     let interface = device_info.interface_number();
-                    
+
                     if let Ok(device) = api.open_path(device_info.path()) {
                         let mut init_success = true;
-                        use base64::{Engine as _, engine::general_purpose};
+                        use base64::{engine::general_purpose, Engine as _};
 
                         if let Some(reports) = &digitizer.feature_init_report {
                             for report_str in reports {
@@ -131,7 +143,9 @@ pub fn detect_tablet(api: &HidApi) -> Option<(HidDevice, Box<dyn TabletDriver>)>
                             }
                         }
 
-                        if !init_success { continue; }
+                        if !init_success {
+                            continue;
+                        }
 
                         if let Some(reports) = &digitizer.output_init_report {
                             for report_str in reports {
@@ -145,10 +159,21 @@ pub fn detect_tablet(api: &HidApi) -> Option<(HidDevice, Box<dyn TabletDriver>)>
                             }
                         }
 
-                        if !init_success { continue; }
+                        if !init_success {
+                            continue;
+                        }
 
                         log::info!(target: "Detect", "Initialized {} (Intf {}) in {:.2?}", config.name, interface, start.elapsed());
-                        return Some((device, Box::new(GenericTabletDriver::new(config.clone()))));
+                        return Some((
+                            device,
+                            Box::new(GenericTabletDriver::new(
+                                config.clone(),
+                                digitizer.vendor_id,
+                                digitizer.product_id,
+                            )),
+                            digitizer.vendor_id,
+                            digitizer.product_id,
+                        ));
                     }
                 }
             }

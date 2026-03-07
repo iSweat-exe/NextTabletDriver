@@ -12,6 +12,8 @@ pub struct SharedState {
     pub config_version: AtomicU32,
     pub tablet_data: RwLock<TabletData>,
     pub tablet_name: RwLock<String>,
+    pub tablet_vid: RwLock<u16>,
+    pub tablet_pid: RwLock<u16>,
     pub physical_size: RwLock<(f32, f32)>,
     pub hardware_size: RwLock<(f32, f32)>,
     pub is_first_run: RwLock<bool>,
@@ -39,19 +41,24 @@ pub fn input_loop(
 
     loop {
         // 1. Connection handling
-        if let Some((device, driver)) = detect_tablet(&hid_api) {
+        if let Some((device, driver, vid, pid)) = detect_tablet(&hid_api) {
             // Keep blocking mode (default) to let the OS sleep the thread
             {
                 let mut name = shared.tablet_name.write().unwrap();
                 *name = driver.get_name().to_string();
+                let mut vid_lock = shared.tablet_vid.write().unwrap();
+                *vid_lock = vid;
+                let mut pid_lock = shared.tablet_pid.write().unwrap();
+                *pid_lock = pid;
+
                 let mut size = shared.physical_size.write().unwrap();
                 *size = driver.get_physical_specs();
                 let mut hw_size = shared.hardware_size.write().unwrap();
                 let (mw, mh, mp) = driver.get_specs();
                 *hw_size = (mw, mh);
 
-                log::info!(target: "Input", "Connected to {}. Physical: {}x{}mm, Hardware: {}x{}, Max Pressure: {}", 
-                    driver.get_name(), size.0, size.1, mw, mh, mp);
+                log::info!(target: "Input", "Connected to {} ({:04x}:{:04x}). Physical: {}x{}mm, Hardware: {}x{}, Max Pressure: {}", 
+                    driver.get_name(), vid, pid, size.0, size.1, mw, mh, mp);
 
                 // Dynamic Area: If first run (no settings loaded), set to full physical size
                 let mut is_first = shared.is_first_run.write().unwrap();
@@ -209,6 +216,8 @@ pub fn input_loop(
                 log::info!(target: "Input", "Tablet disconnected");
             }
             *name_lock = "No Tablet Detected".to_string();
+            *shared.tablet_vid.write().unwrap() = 0;
+            *shared.tablet_pid.write().unwrap() = 0;
             let mut shared_data = shared.tablet_data.write().unwrap();
             *shared_data = TabletData::default();
         }

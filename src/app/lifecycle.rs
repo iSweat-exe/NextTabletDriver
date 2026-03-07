@@ -45,6 +45,7 @@ impl TabletMapperApp {
                 eraser_binding: "None".to_string(),
                 pen_button_bindings: vec!["None".to_string(), "None".to_string()],
                 run_at_startup: crate::startup::is_run_at_startup_registered(),
+                enable_telemetry: true,
                 websocket: WebSocketConfig::default(),
             }
         };
@@ -54,6 +55,8 @@ impl TabletMapperApp {
             config_version: AtomicU32::new(0),
             tablet_data: RwLock::new(TabletData::default()),
             tablet_name: RwLock::new("No Tablet Detected".to_string()),
+            tablet_vid: RwLock::new(0),
+            tablet_pid: RwLock::new(0),
             physical_size: RwLock::new((160.0, 100.0)),
             hardware_size: RwLock::new((32767.0, 32767.0)),
             is_first_run: RwLock::new(is_first_run),
@@ -74,6 +77,10 @@ impl TabletMapperApp {
         thread::spawn(move || {
             crate::app::websocket::websocket_loop(ws_shared);
         });
+
+        // Spawn Telemetry Thread
+        let telemetry_shared = Arc::clone(&shared);
+        crate::telemetry::init_telemetry(telemetry_shared);
 
         let (update_sender, update_receiver) = crossbeam_channel::bounded(1);
         thread::spawn(move || match autoupdate::check_for_updates() {

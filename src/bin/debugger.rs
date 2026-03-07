@@ -1,13 +1,13 @@
 #![windows_subsystem = "windows"]
 
+use crate::drivers::detect_tablet;
 use eframe::egui;
-use std::time::{Duration, Instant};
-use std::sync::{Arc, RwLock};
 use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::{Arc, RwLock};
+use std::time::{Duration, Instant};
 use tablet_driver::drivers::{self, TabletData};
 use tablet_driver::input::SharedState;
 use tablet_driver::ui::panels::render_debugger_panel;
-use crate::drivers::detect_tablet;
 
 fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
@@ -16,7 +16,7 @@ fn main() -> eframe::Result {
             .with_title("TD - Tablet Debugger"),
         ..Default::default()
     };
-    
+
     eframe::run_native(
         "TD - Tablet Debugger",
         options,
@@ -32,7 +32,7 @@ struct TabletApp {
     api: hidapi::HidApi,
     device: Option<hidapi::HidDevice>,
     driver: Option<Box<dyn drivers::TabletDriver>>,
-    
+
     // Metrics
     last_update: Instant,
     last_hz_update: Instant,
@@ -47,8 +47,19 @@ impl TabletApp {
         log::info!(target: "Detect", "HID API initialized in {:.2?}", api_start.elapsed());
 
         let dummy_config = tablet_driver::domain::MappingConfig {
-            active_area: tablet_driver::domain::ActiveArea { x: 80.0, y: 50.0, w: 160.0, h: 100.0, rotation: 0.0 },
-            target_area: tablet_driver::domain::TargetArea { x: 0.0, y: 0.0, w: 1920.0, h: 1080.0 },
+            active_area: tablet_driver::domain::ActiveArea {
+                x: 80.0,
+                y: 50.0,
+                w: 160.0,
+                h: 100.0,
+                rotation: 0.0,
+            },
+            target_area: tablet_driver::domain::TargetArea {
+                x: 0.0,
+                y: 0.0,
+                w: 1920.0,
+                h: 1080.0,
+            },
             tip_threshold: 10,
             eraser_threshold: 10,
             disable_pressure: false,
@@ -57,6 +68,7 @@ impl TabletApp {
             eraser_binding: "None".to_string(),
             pen_button_bindings: vec!["None".to_string(), "None".to_string()],
             run_at_startup: false,
+            enable_telemetry: true,
             websocket: tablet_driver::domain::WebSocketConfig::default(),
         };
 
@@ -65,6 +77,8 @@ impl TabletApp {
             config_version: AtomicU32::new(0),
             tablet_data: RwLock::new(TabletData::default()),
             tablet_name: RwLock::new("No Tablet Detected".to_string()),
+            tablet_vid: RwLock::new(0),
+            tablet_pid: RwLock::new(0),
             physical_size: RwLock::new((160.0, 100.0)),
             hardware_size: RwLock::new((32767.0, 32767.0)),
             is_first_run: RwLock::new(false),
@@ -87,33 +101,38 @@ impl TabletApp {
 impl eframe::App for TabletApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         // --- AUTO-RECONNECT & USB READ ---
-        if self.device.is_none()
-             && self.last_update.elapsed().as_secs() >= 1 {
-                 if let Some((dev, drv)) = detect_tablet(&self.api) {
-                     let _ = dev.set_blocking_mode(false);
-                     let specs = drv.get_specs();
-                     {
-                         let mut hw = self.shared.hardware_size.write().unwrap();
-                         *hw = (specs.0, specs.1);
-                         let mut name = self.shared.tablet_name.write().unwrap();
-                         *name = drv.get_name().to_string();
-                     }
-                     self.device = Some(dev);
-                     self.driver = Some(drv);
-                 }
-                 self.last_update = Instant::now();
-             }
+        if self.device.is_none() && self.last_update.elapsed().as_secs() >= 1 {
+            if let Some((dev, drv, vid, pid)) = detect_tablet(&self.api) {
+                let _ = dev.set_blocking_mode(false);
+                let specs = drv.get_specs();
+                {
+                    let mut hw = self.shared.hardware_size.write().unwrap();
+                    *hw = (specs.0, specs.1);
+                    let mut name = self.shared.tablet_name.write().unwrap();
+                    *name = drv.get_name().to_string();
+                    let mut vid_lock = self.shared.tablet_vid.write().unwrap();
+                    *vid_lock = vid;
+                    let mut pid_lock = self.shared.tablet_pid.write().unwrap();
+                    *pid_lock = pid;
+                }
+                self.device = Some(dev);
+                self.driver = Some(drv);
+            }
+            self.last_update = Instant::now();
+        }
 
         if let (Some(dev), Some(drv)) = (&self.device, &self.driver) {
             let mut buf = [0u8; 64];
             while let Ok(len) = dev.read(&mut buf) {
-                if len == 0 { break; }
+                if len == 0 {
+                    break;
+                }
                 if let Some(data) = drv.parse(&buf[..len]) {
-                     {
-                         let mut shared_data = self.shared.tablet_data.write().unwrap();
-                         *shared_data = data;
-                         self.shared.packet_count.fetch_add(1, Ordering::Relaxed);
-                     }
+                    {
+                        let mut shared_data = self.shared.tablet_data.write().unwrap();
+                        *shared_data = data;
+                        self.shared.packet_count.fetch_add(1, Ordering::Relaxed);
+                    }
                 }
             }
         }
@@ -136,7 +155,7 @@ impl eframe::App for TabletApp {
                 ui.add_space(5.0);
                 ui.heading(egui::RichText::new(name).strong().extra_letter_spacing(1.5));
             });
-            
+
             render_debugger_panel(self.shared.clone(), self.displayed_hz, ui);
         });
 
