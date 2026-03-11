@@ -47,23 +47,20 @@ pub struct TabletInfo {
 
 fn get_machine_hash() -> String {
     let mut hasher = DefaultHasher::new();
-
-    // PC Name
-    if let Ok(hostname) = std::env::var("COMPUTERNAME") {
-        hostname.hash(&mut hasher);
-    }
-
-    // User Name
-    if let Ok(username) = std::env::var("USERNAME") {
-        username.hash(&mut hasher);
-    }
+    
+    // Get stable machine ID (registry MachineGuid on Windows)
+    let machine_id = machine_uid::get().unwrap_or_else(|_| "unknown_machine".to_string());
+    machine_id.hash(&mut hasher);
 
     format!("{:x}", hasher.finish())
 }
 
 fn get_os_info() -> (String, String) {
     let info = os_info::get();
-    (info.os_type().to_string().to_lowercase(), info.version().to_string())
+    (
+        info.os_type().to_string().to_lowercase(),
+        info.version().to_string(),
+    )
 }
 
 pub fn init_telemetry(shared: Arc<SharedState>) {
@@ -132,6 +129,7 @@ fn send_telemetry(machine_hash: &str, session_id: &str, shared: &SharedState) {
 
     let client = reqwest::blocking::Client::new();
     match client
+    // TODO: Dev Telemetry Dashboard in React
         .post("http://localhost:3000/api/telemetry")
         .json(&payload)
         .timeout(Duration::from_secs(10))
