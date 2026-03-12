@@ -1,7 +1,7 @@
 pub mod antichatter;
 pub mod stats;
 
-use crate::domain::MappingConfig;
+use crate::core::config::models::MappingConfig;
 
 pub trait Filter: Send + Sync {
     fn name(&self) -> &'static str;

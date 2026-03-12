@@ -21,7 +21,7 @@ pub enum UpdateStatus {
     Idle,
     Checking,
     Available(Release),
-    Downloading(f32), // Progress 0.0 to 1.0
+    Downloading(f32),
     ReadyToInstall(PathBuf),
     Error(String),
 }

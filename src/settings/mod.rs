@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use std::fs;
 use directories::ProjectDirs;
-use crate::domain::MappingConfig;
+use crate::core::config::models::MappingConfig;
 
 pub fn get_settings_dir() -> PathBuf {
     if let Some(proj_dirs) = ProjectDirs::from("com", "TabletDriver", "TabletReader") {

@@ -1,8 +1,8 @@
 pub mod app;
-pub mod domain;
+pub mod core;
 pub mod drivers;
+pub mod engine;
 pub mod filters;
-pub mod input;
 pub mod logger;
 pub mod settings;
 pub mod startup;

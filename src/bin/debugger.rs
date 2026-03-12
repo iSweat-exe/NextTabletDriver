@@ -6,7 +6,7 @@ use std::sync::atomic::{AtomicU32, Ordering};
 use std::sync::{Arc, RwLock};
 use std::time::{Duration, Instant};
 use tablet_driver::drivers::{self, TabletData};
-use tablet_driver::input::SharedState;
+use tablet_driver::engine::state::SharedState;
 use tablet_driver::ui::panels::render_debugger_panel;
 
 fn main() -> eframe::Result {
@@ -46,22 +46,22 @@ impl TabletApp {
         let api = hidapi::HidApi::new().unwrap();
         log::info!(target: "Detect", "HID API initialized in {:.2?}", api_start.elapsed());
 
-        let dummy_config = tablet_driver::domain::MappingConfig {
-            mode: tablet_driver::domain::DriverMode::Absolute,
-            active_area: tablet_driver::domain::ActiveArea {
+        let dummy_config = tablet_driver::core::config::models::MappingConfig {
+            mode: tablet_driver::core::config::models::DriverMode::Absolute,
+            active_area: tablet_driver::core::config::models::ActiveArea {
                 x: 0.0,
                 y: 0.0,
                 w: 100.0,
                 h: 100.0,
                 rotation: 0.0,
             },
-            target_area: tablet_driver::domain::TargetArea {
+            target_area: tablet_driver::core::config::models::TargetArea {
                 x: 0.0,
                 y: 0.0,
                 w: 1920.0,
                 h: 1080.0,
             },
-            relative_config: tablet_driver::domain::RelativeConfig::default(),
+            relative_config: tablet_driver::core::config::models::RelativeConfig::default(),
             tip_threshold: 0,
             eraser_threshold: 0,
             disable_pressure: false,

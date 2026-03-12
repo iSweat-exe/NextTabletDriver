@@ -1,5 +1,5 @@
 use crate::app::state::TabletMapperApp;
-use crate::domain::MappingConfig;
+use crate::core::config::models::MappingConfig;
 use crate::ui::theme::ui_section_header;
 use eframe::egui;
 
@@ -51,10 +51,10 @@ pub fn render_settings_panel(
             ui.checkbox(&mut config.websocket.enabled, "Enable WebSocket Server");
             if config.websocket.enabled {
                 ui.label(
-                    egui::RichText::new("● Running").color(egui::Color32::from_rgb(0, 200, 0)),
+                    egui::RichText::new("â— Running").color(egui::Color32::from_rgb(0, 200, 0)),
                 );
             } else {
-                ui.label(egui::RichText::new("○ Stopped").color(egui::Color32::GRAY));
+                ui.label(egui::RichText::new("â—‹ Stopped").color(egui::Color32::GRAY));
             }
         });
 

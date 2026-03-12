@@ -5,7 +5,7 @@ use std::time::Instant;
 
 use crate::app::autoupdate::UpdateStatus;
 use crate::drivers::TabletData;
-use crate::input::SharedState;
+use crate::engine::state::SharedState;
 use crossbeam_channel::Receiver;
 
 #[derive(PartialEq, Clone, Copy)]

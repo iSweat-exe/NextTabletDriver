@@ -1,6 +1,6 @@
 use std::sync::Arc;
 use eframe::egui;
-use crate::input::SharedState;
+use crate::engine::state::SharedState;
 
 pub fn render_debugger_panel(shared: Arc<SharedState>, displayed_hz: f32, ui: &mut egui::Ui) {
     let tablet_data = shared.tablet_data.read().unwrap();

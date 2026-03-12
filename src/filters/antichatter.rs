@@ -1,4 +1,4 @@
-use crate::domain::MappingConfig;
+use crate::core::config::models::MappingConfig;
 use crate::filters::Filter;
 use std::collections::VecDeque;
 

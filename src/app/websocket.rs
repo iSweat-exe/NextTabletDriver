@@ -8,7 +8,7 @@ use serde::{Serialize};
 use tungstenite::{accept, Message};
 use tungstenite::protocol::WebSocket;
 
-use crate::input::SharedState;
+use crate::engine::state::SharedState;
 
 #[derive(Serialize)]
 struct WsPayload {

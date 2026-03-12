@@ -1,5 +1,5 @@
 use crate::app::state::{AppTab, TabletMapperApp};
-use crate::settings::{save_last_session, save_settings};
+use crate::settings::save_last_session;
 use crate::ui::panels::console::render_console_panel;
 use crate::ui::panels::filters::render_filters_panel;
 use crate::ui::panels::output::render_output_panel;
@@ -9,6 +9,7 @@ use crate::ui::panels::settings::render_settings_panel;
 use crate::ui::panels::support::render_support_panel;
 use eframe::egui;
 use std::sync::atomic::Ordering;
+use std::sync::Arc;
 
 impl eframe::App for TabletMapperApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
@@ -31,50 +32,9 @@ impl eframe::App for TabletMapperApp {
             self.update_status = status;
         }
 
-        // Show update dialog if available
-        let mut update_action = None;
-        if let crate::app::autoupdate::UpdateStatus::Available(release) = &self.update_status {
-            let mut open = true;
-            let version = release.tag_name.clone();
-            egui::Window::new("Update Available")
-                .collapsible(false)
-                .resizable(false)
-                .open(&mut open)
-                .show(ctx, |ui| {
-                    ui.vertical_centered(|ui| {
-                        ui.add_space(10.0);
-                        ui.label(format!("A new version ({}) is available.", version));
-                        ui.label("Would you like to install it now?");
-                        ui.add_space(20.0);
-                        ui.horizontal(|ui| {
-                            if ui.button("Update Now").clicked() {
-                                update_action = Some(true);
-                            }
-                            if ui.button("Later").clicked() {
-                                update_action = Some(false);
-                            }
-                        });
-                    });
-                });
-        }
-
-        if let Some(install) = update_action {
-            if install {
-                if let Some(release) = self.update_status.as_release() {
-                    let release_clone = release.clone();
-                    std::thread::spawn(move || {
-                        let _ = crate::app::autoupdate::download_and_install(release_clone);
-                    });
-                    self.update_status = crate::app::autoupdate::UpdateStatus::Downloading(0.0);
-                }
-            } else {
-                self.update_status = crate::app::autoupdate::UpdateStatus::Idle;
-            }
-        }
+        crate::ui::components::update_dialog::render_update_dialog(self, ctx);
 
         // Get snapshot of data for UX
-        let tablet_name = self.shared.tablet_name.read().unwrap().clone();
-
         // We modify local copies of config then push to shared if changed
         let mut config = self.shared.config.read().unwrap().clone();
         let initial_config = config.clone();
@@ -104,253 +64,13 @@ impl eframe::App for TabletMapperApp {
         // === UI PANELS (ORDER MATTERS) ===
 
         // 1. Top Menu Bar
-        egui::TopBottomPanel::top("menu_bar")
-            .frame(
-                egui::Frame::none()
-                    .fill(ctx.style().visuals.panel_fill)
-                    .inner_margin(2.0),
-            )
-            .show(ctx, |ui| {
-                ui.horizontal(|ui| {
-                    ui.menu_button("File", |ui| {
-                        if ui.button("Load Settings...").clicked() {
-                            ui.close_menu();
-                            if let Some(path) = rfd::FileDialog::new()
-                                .set_directory(crate::settings::get_settings_dir())
-                                .add_filter("JSON", &["json"])
-                                .pick_file()
-                            {
-                                log::debug!(target: "App", "Loading settings from {:?}", path);
-                                if let Ok(cfg) =
-                                    crate::settings::load_settings_from_file(path.clone())
-                                {
-                                    let mut shared_config = self.shared.config.write().unwrap();
-                                    *shared_config = cfg.clone();
-                                    if let Some(name) = path.file_stem().and_then(|s| s.to_str()) {
-                                        self.profile_name = name.to_string();
-                                    }
-                                    let _ = save_last_session(&cfg);
-                                }
-                            }
-                        }
-                        if ui.button("Save Settings").clicked() {
-                            ui.close_menu();
-                            let config = self.shared.config.read().unwrap().clone();
-                            let profile = if !self.profile_name.is_empty() {
-                                self.profile_name.clone()
-                            } else {
-                                "Default".to_string()
-                            };
-                            log::debug!(target: "App", "Saving settings to profile: {}", profile);
-                            if !self.profile_name.is_empty() {
-                                let _ = save_settings(&self.profile_name, &config);
-                            } else {
-                                // Default to "Default" if empty
-                                let _ = save_settings("Default", &config);
-                                self.profile_name = "Default".to_string();
-                            }
-                        }
-                        if ui.button("Save Settings As...").clicked() {
-                            ui.close_menu();
-                            if let Some(path) = rfd::FileDialog::new()
-                                .set_directory(crate::settings::get_settings_dir())
-                                .add_filter("JSON", &["json"])
-                                .save_file()
-                            {
-                                let config = self.shared.config.read().unwrap().clone();
-                                // Save to the selected path
-                                if let Ok(json) = serde_json::to_string_pretty(&config) {
-                                    let _ = std::fs::write(&path, json);
-                                    if let Some(name) = path.file_stem().and_then(|s| s.to_str()) {
-                                        self.profile_name = name.to_string();
-                                    }
-                                }
-                            }
-                        }
-
-                        if ui.button("Reset to default").clicked() {
-                            ui.close_menu();
-                            let default_target = crate::domain::TargetArea {
-                                x: 0.0,
-                                y: 0.0,
-                                w: 1920.0,
-                                h: 1080.0,
-                            };
-                            let default_active = crate::domain::ActiveArea {
-                                x: 80.0,
-                                y: 50.0,
-                                w: 160.0,
-                                h: 100.0,
-                                rotation: 0.0,
-                            };
-                            let mut shared_config = self.shared.config.write().unwrap();
-                            shared_config.target_area = default_target;
-                            shared_config.active_area = default_active;
-                        }
-
-                        ui.separator();
-
-                        if ui.button("Apply Settings").clicked() {
-                            ui.close_menu();
-                            log::debug!(target: "App", "Applying settings to last session");
-                            let config = self.shared.config.read().unwrap().clone();
-                            let _ = save_last_session(&config);
-                        }
-
-                        ui.separator();
-
-                        if ui.button("Export .Json").clicked() {
-                            ui.close_menu();
-                            if let Some(path) = rfd::FileDialog::new()
-                                .set_file_name("settings_export.json")
-                                .add_filter("JSON", &["json"])
-                                .save_file()
-                            {
-                                let config = self.shared.config.read().unwrap().clone();
-                                if let Ok(json) = serde_json::to_string_pretty(&config) {
-                                    let _ = std::fs::write(path, json);
-                                }
-                            }
-                        }
-                        if ui.button("Import .Json").clicked() {
-                            ui.close_menu();
-                            if let Some(path) = rfd::FileDialog::new()
-                                .add_filter("JSON", &["json"])
-                                .pick_file()
-                            {
-                                if let Ok(cfg) = crate::settings::load_settings_from_file(path) {
-                                    let mut shared_config = self.shared.config.write().unwrap();
-                                    *shared_config = cfg;
-                                }
-                            }
-                        }
-                    });
-                    ui.menu_button("Tablet", |ui| {
-                        if ui.button("Open Debugger").clicked() {
-                            ui.close_menu();
-                            log::debug!(target: "App", "Launching tablet debugger");
-                            let _ = std::process::Command::new("cargo")
-                                .args(["run", "--bin", "debugger"])
-                                .spawn();
-                        }
-                    });
-                    ui.menu_button("Plugins", |_| {});
-                    ui.menu_button("Help", |_| {});
-                });
-            });
+        crate::ui::components::menu_bar::render_menu_bar(self, ctx);
 
         // 2. Tabs
-        egui::TopBottomPanel::top("tabs")
-            .frame(
-                egui::Frame::none()
-                    .fill(ctx.style().visuals.panel_fill)
-                    .inner_margin(egui::Margin {
-                        left: 5.0,
-                        right: 5.0,
-                        top: 5.0,
-                        bottom: 5.0,
-                    })
-                    .stroke(egui::Stroke::new(1.0, egui::Color32::from_gray(220))),
-            ) // Only one clean line at bottom
-            .show(ctx, |ui| {
-                ui.horizontal(|ui| {
-                    if ui
-                        .selectable_value(&mut self.active_tab, AppTab::Output, "Output")
-                        .clicked()
-                    {
-                        log::debug!(target: "App", "Switched to Output tab");
-                    }
-                    if ui
-                        .selectable_value(&mut self.active_tab, AppTab::Filters, "Filters")
-                        .clicked()
-                    {
-                        log::debug!(target: "App", "Switched to Filters tab");
-                    }
-                    if ui
-                        .selectable_value(&mut self.active_tab, AppTab::PenSettings, "Pen Settings")
-                        .clicked()
-                    {
-                        log::debug!(target: "App", "Switched to Pen Settings tab");
-                    }
-                    if ui
-                        .selectable_value(&mut self.active_tab, AppTab::Console, "Console")
-                        .clicked()
-                    {
-                        log::debug!(target: "App", "Switched to Console tab");
-                    }
-                    if ui
-                        .selectable_value(&mut self.active_tab, AppTab::Settings, "Settings")
-                        .clicked()
-                    {
-                        log::debug!(target: "App", "Switched to Settings tab");
-                    }
-                    if ui
-                        .selectable_value(&mut self.active_tab, AppTab::Support, "Support")
-                        .clicked()
-                    {
-                        log::debug!(target: "App", "Switched to Support tab");
-                    }
-                    if ui
-                        .selectable_value(&mut self.active_tab, AppTab::Release, "Release")
-                        .clicked()
-                    {
-                        log::debug!(target: "App", "Switched to Release tab");
-                    }
-                });
-            });
+        crate::ui::components::tabs::render_tabs(self, ctx);
 
         // 3. Bottom Footer
-        egui::TopBottomPanel::bottom("footer")
-            .frame(
-                egui::Frame::none()
-                    .fill(ctx.style().visuals.panel_fill)
-                    .inner_margin(egui::Margin::symmetric(10.0, 5.0))
-                    .stroke(egui::Stroke::new(1.0, egui::Color32::from_gray(220))),
-            ) // Clean line at top
-            .show(ctx, |ui| {
-                ui.horizontal(|ui| {
-                    let mut current_mode = config.mode;
-                    egui::ComboBox::from_id_salt("mode_combo")
-                        .selected_text(format!("{:?} Mode", current_mode))
-                        .show_ui(ui, |ui| {
-                            ui.selectable_value(
-                                &mut current_mode,
-                                crate::domain::DriverMode::Absolute,
-                                "Absolute Mode",
-                            );
-                            ui.selectable_value(
-                                &mut current_mode,
-                                crate::domain::DriverMode::Relative,
-                                "Relative Mode",
-                            );
-                        });
-
-                    if current_mode != config.mode {
-                        config.mode = current_mode;
-                        // Mode change affects coordinate handling, signal the backend
-                        self.shared.config_version.fetch_add(1, Ordering::SeqCst);
-                    }
-
-                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        ui.label(
-                            egui::RichText::new(format!("V{}", crate::VERSION))
-                                .color(egui::Color32::GRAY)
-                                .strong(),
-                        );
-                        ui.add_space(8.0);
-
-                        ui.horizontal(|ui| {
-                            ui.label(egui::RichText::new(&self.profile_name).strong());
-                            ui.label("Profile:");
-                        });
-
-                        egui::ComboBox::from_id_salt("device_combo")
-                            .width(200.0)
-                            .selected_text(tablet_name)
-                            .show_ui(ui, |_| {});
-                    });
-                });
-            });
+        crate::ui::components::footer::render_footer(self, ctx, &mut config);
 
         // 4. Central Content
         egui::CentralPanel::default().show(ctx, |ui| {

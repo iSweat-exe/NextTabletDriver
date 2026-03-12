@@ -7,9 +7,10 @@ use std::time::Instant;
 
 use crate::app::autoupdate::{self, UpdateStatus};
 use crate::app::state::{AppTab, TabletMapperApp};
-use crate::domain::{ActiveArea, MappingConfig, TargetArea, WebSocketConfig};
+use crate::core::config::models::{ActiveArea, MappingConfig, TargetArea, WebSocketConfig};
 use crate::drivers::TabletData;
-use crate::input::{input_loop, SharedState};
+use crate::engine::state::SharedState;
+use crate::engine::tablet_manager::run_manager;
 use crate::settings::load_last_session;
 
 impl TabletMapperApp {
@@ -24,7 +25,7 @@ impl TabletMapperApp {
             cfg
         } else {
             MappingConfig {
-                mode: crate::domain::DriverMode::Absolute,
+                mode: crate::core::config::models::DriverMode::Absolute,
                 active_area: ActiveArea {
                     x: 80.0,
                     y: 50.0,
@@ -38,7 +39,7 @@ impl TabletMapperApp {
                     w: 1920.0,
                     h: 1080.0,
                 },
-                relative_config: crate::domain::RelativeConfig::default(),
+                relative_config: crate::core::config::models::RelativeConfig::default(),
                 tip_threshold: 10,
                 eraser_threshold: 10,
                 disable_pressure: false,
@@ -49,8 +50,8 @@ impl TabletMapperApp {
                 run_at_startup: crate::startup::is_run_at_startup_registered(),
                 enable_telemetry: true,
                 websocket: WebSocketConfig::default(),
-                antichatter: crate::domain::AntichatterConfig::default(),
-                speed_stats: crate::domain::SpeedStatsConfig::default(),
+                antichatter: crate::core::config::models::AntichatterConfig::default(),
+                speed_stats: crate::core::config::models::SpeedStatsConfig::default(),
             }
         };
 
@@ -74,7 +75,7 @@ impl TabletMapperApp {
         let thread_shared = Arc::clone(&shared);
         let thread_ctx = _ctx.clone();
         thread::spawn(move || {
-            input_loop(thread_shared, thread_ctx, tablet_sender);
+            run_manager(thread_shared, thread_ctx, tablet_sender);
         });
 
         // Spawn WebSocket Setup Thread
