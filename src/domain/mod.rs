@@ -17,6 +17,37 @@ pub struct TargetArea {
     pub h: f32, // Pixels
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub enum DriverMode {
+    Absolute,
+    Relative,
+}
+
+impl Default for DriverMode {
+    fn default() -> Self {
+        Self::Absolute
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub struct RelativeConfig {
+    pub x_sensitivity: f32,
+    pub y_sensitivity: f32,
+    pub rotation: f32,
+    pub reset_time_ms: u32,
+}
+
+impl Default for RelativeConfig {
+    fn default() -> Self {
+        Self {
+            x_sensitivity: 10.0,
+            y_sensitivity: 10.0,
+            rotation: 0.0,
+            reset_time_ms: 100,
+        }
+    }
+}
+
 fn default_threshold() -> u16 {
     10
 }
@@ -76,8 +107,12 @@ impl Default for WebSocketConfig {
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct MappingConfig {
+    #[serde(default)]
+    pub mode: DriverMode,
     pub active_area: ActiveArea,
     pub target_area: TargetArea,
+    #[serde(default)]
+    pub relative_config: RelativeConfig,
     #[serde(default = "default_threshold")]
     pub tip_threshold: u16,
     #[serde(default = "default_threshold")]

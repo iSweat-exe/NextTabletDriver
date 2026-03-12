@@ -24,6 +24,7 @@ impl TabletMapperApp {
             cfg
         } else {
             MappingConfig {
+                mode: crate::domain::DriverMode::Absolute,
                 active_area: ActiveArea {
                     x: 80.0,
                     y: 50.0,
@@ -37,6 +38,7 @@ impl TabletMapperApp {
                     w: 1920.0,
                     h: 1080.0,
                 },
+                relative_config: crate::domain::RelativeConfig::default(),
                 tip_threshold: 10,
                 eraser_threshold: 10,
                 disable_pressure: false,

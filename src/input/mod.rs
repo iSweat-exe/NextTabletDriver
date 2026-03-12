@@ -38,6 +38,7 @@ pub fn input_loop(
 
     let mut last_screen_x = -1.0;
     let mut last_screen_y = -1.0;
+    let mut last_packet_time = Instant::now();
 
     loop {
         // 1. Connection handling
@@ -143,22 +144,78 @@ pub fn input_loop(
                                 // 2. Project to Screen Space
                                 u = u.clamp(0.0, 1.0);
                                 v = v.clamp(0.0, 1.0);
-                                let screen_x =
-                                    local_config.target_area.x + u * local_config.target_area.w;
-                                let screen_y =
-                                    local_config.target_area.y + v * local_config.target_area.h;
 
-                                // 3. Inject only if changed (sub-pixel optimization)
-                                if (screen_x - last_screen_x).abs() > 0.1
-                                    || (screen_y - last_screen_y).abs() > 0.1
-                                {
-                                    let _ = enigo.move_mouse(
-                                        screen_x as i32,
-                                        screen_y as i32,
-                                        Coordinate::Abs,
-                                    );
-                                    last_screen_x = screen_x;
-                                    last_screen_y = screen_y;
+                                match local_config.mode {
+                                    crate::domain::DriverMode::Absolute => {
+                                        let screen_x = local_config.target_area.x
+                                            + u * local_config.target_area.w;
+                                        let screen_y = local_config.target_area.y
+                                            + v * local_config.target_area.h;
+
+                                        // 3. Inject only if changed (sub-pixel optimization)
+                                        if (screen_x - last_screen_x).abs() > 0.1
+                                            || (screen_y - last_screen_y).abs() > 0.1
+                                        {
+                                            let _ = enigo.move_mouse(
+                                                screen_x as i32,
+                                                screen_y as i32,
+                                                Coordinate::Abs,
+                                            );
+                                            last_screen_x = screen_x;
+                                            last_screen_y = screen_y;
+                                        }
+                                    }
+                                    crate::domain::DriverMode::Relative => {
+                                        // Reset handling: if too much time passes between packets, reset the starting point
+                                        if now.duration_since(last_packet_time)
+                                            > Duration::from_millis(
+                                                local_config.relative_config.reset_time_ms as u64,
+                                            )
+                                        {
+                                            last_screen_x = -1.0;
+                                            last_screen_y = -1.0;
+                                        }
+                                        last_packet_time = now;
+
+                                        if last_screen_x != -1.0 && last_screen_y != -1.0 {
+                                            // 1. Calculate delta in Millimeters
+                                            let mut dx_mm = x_mm - last_screen_x;
+                                            let mut dy_mm = y_mm - last_screen_y;
+
+                                            // 2. Apply Rotation (to the delta vector)
+                                            if local_config.relative_config.rotation != 0.0 {
+                                                let rad = local_config
+                                                    .relative_config
+                                                    .rotation
+                                                    .to_radians();
+                                                let (sin, cos) = rad.sin_cos();
+                                                let rx = dx_mm * cos - dy_mm * sin;
+                                                let ry = dx_mm * sin + dy_mm * cos;
+                                                dx_mm = rx;
+                                                dy_mm = ry;
+                                            }
+
+                                            // 3. Apply X/Y Sensitivities (px/mm)
+                                            let dx_px =
+                                                dx_mm * local_config.relative_config.x_sensitivity;
+                                            let dy_px =
+                                                dy_mm * local_config.relative_config.y_sensitivity;
+
+                                            if dx_px.abs() > 0.01 || dy_px.abs() > 0.01 {
+                                                let _ = enigo.move_mouse(
+                                                    dx_px as i32,
+                                                    dy_px as i32,
+                                                    Coordinate::Rel,
+                                                );
+                                            }
+                                        }
+
+                                        // Reset handling: if too much time passes between packets, reset the starting point
+                                        // This prevents huge jumps if the driver/tablet stuttered
+                                        // But here we use last_screen_x as the mm position.
+                                        last_screen_x = x_mm;
+                                        last_screen_y = y_mm;
+                                    }
                                 }
 
                                 // 4. Click Handling (Tip)
@@ -193,6 +250,9 @@ pub fn input_loop(
                                     let _ = enigo.button(Button::Left, Direction::Release);
                                     last_pressure_down = false;
                                 }
+                                // Reset last position when pen leaves range to avoid large jumps in relative mode
+                                last_screen_x = -1.0;
+                                last_screen_y = -1.0;
                             }
                         }
                     }

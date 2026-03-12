@@ -47,10 +47,11 @@ impl TabletApp {
         log::info!(target: "Detect", "HID API initialized in {:.2?}", api_start.elapsed());
 
         let dummy_config = tablet_driver::domain::MappingConfig {
+            mode: tablet_driver::domain::DriverMode::Absolute,
             active_area: tablet_driver::domain::ActiveArea {
-                x: 80.0,
-                y: 50.0,
-                w: 160.0,
+                x: 0.0,
+                y: 0.0,
+                w: 100.0,
                 h: 100.0,
                 rotation: 0.0,
             },
@@ -60,16 +61,17 @@ impl TabletApp {
                 w: 1920.0,
                 h: 1080.0,
             },
-            tip_threshold: 10,
-            eraser_threshold: 10,
+            relative_config: tablet_driver::domain::RelativeConfig::default(),
+            tip_threshold: 0,
+            eraser_threshold: 0,
             disable_pressure: false,
             disable_tilt: false,
             tip_binding: "None".to_string(),
             eraser_binding: "None".to_string(),
             pen_button_bindings: vec!["None".to_string(), "None".to_string()],
             run_at_startup: false,
-            enable_telemetry: true,
-            websocket: tablet_driver::domain::WebSocketConfig::default(),
+            enable_telemetry: false,
+            websocket: Default::default(),
         };
 
         let shared = Arc::new(SharedState {

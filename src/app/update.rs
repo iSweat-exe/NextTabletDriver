@@ -316,11 +316,27 @@ impl eframe::App for TabletMapperApp {
             ) // Clean line at top
             .show(ctx, |ui| {
                 ui.horizontal(|ui| {
+                    let mut current_mode = config.mode;
                     egui::ComboBox::from_id_salt("mode_combo")
-                        .selected_text("Absolute Mode")
+                        .selected_text(format!("{:?} Mode", current_mode))
                         .show_ui(ui, |ui| {
-                            ui.label("Absolute Mode");
+                            ui.selectable_value(
+                                &mut current_mode,
+                                crate::domain::DriverMode::Absolute,
+                                "Absolute Mode",
+                            );
+                            ui.selectable_value(
+                                &mut current_mode,
+                                crate::domain::DriverMode::Relative,
+                                "Relative Mode",
+                            );
                         });
+
+                    if current_mode != config.mode {
+                        config.mode = current_mode;
+                        // Mode change affects coordinate handling, signal the backend
+                        self.shared.config_version.fetch_add(1, Ordering::SeqCst);
+                    }
 
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                         ui.label(
