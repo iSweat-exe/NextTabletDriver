@@ -13,7 +13,7 @@
 
 ---
 
-Welcome to my project! I'm building a high-performance, event-driven tablet driver in Rust, specifically tailored for **Osu!** and digital drawing.
+Welcome to my project! I'm building a high-performance, event-driven tablet driver in Rust, specifically tailored for **Osu!** and digital drawing. called Next Tablet Driver.. or NTD (or NextTD) yess..
 
 ## My Vision for the Project
 
