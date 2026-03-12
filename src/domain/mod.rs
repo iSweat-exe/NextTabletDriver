@@ -140,6 +140,39 @@ impl Default for AntichatterConfig {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub enum SpeedUnit {
+    MillimetersPerSecond,
+    MetersPerSecond,
+    KilometersPerHour,
+    MilesPerHour,
+}
+
+impl Default for SpeedUnit {
+    fn default() -> Self {
+        Self::MillimetersPerSecond
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct SpeedStatsConfig {
+    pub enabled: bool,
+    pub ip: String,
+    pub port: u16,
+    pub unit: SpeedUnit,
+}
+
+impl Default for SpeedStatsConfig {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            ip: "127.0.0.1".to_string(),
+            port: 9001,
+            unit: SpeedUnit::MillimetersPerSecond,
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct MappingConfig {
     #[serde(default)]
@@ -150,6 +183,8 @@ pub struct MappingConfig {
     pub relative_config: RelativeConfig,
     #[serde(default)]
     pub antichatter: AntichatterConfig,
+    #[serde(default)]
+    pub speed_stats: SpeedStatsConfig,
     #[serde(default = "default_threshold")]
     pub tip_threshold: u16,
     #[serde(default = "default_threshold")]

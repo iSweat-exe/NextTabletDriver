@@ -26,6 +26,12 @@ pub struct TabletData {
     pub is_connected: bool,
 }
 
+#[derive(Clone, Copy, Debug, Default)]
+pub struct DriverStats {
+    pub handspeed: f32,
+    pub total_distance_mm: f32,
+}
+
 pub trait TabletDriver {
     fn get_name(&self) -> &str;
     fn get_specs(&self) -> (f32, f32, f32); // Max X, Max Y, Max Pressure

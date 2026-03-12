@@ -73,6 +73,7 @@ impl TabletApp {
             enable_telemetry: false,
             websocket: Default::default(),
             antichatter: Default::default(),
+            speed_stats: Default::default(),
         };
 
         let shared = Arc::new(SharedState {
@@ -86,6 +87,7 @@ impl TabletApp {
             hardware_size: RwLock::new((32767.0, 32767.0)),
             is_first_run: RwLock::new(false),
             packet_count: AtomicU32::new(0),
+            stats: RwLock::new(Default::default()),
         });
 
         Self {

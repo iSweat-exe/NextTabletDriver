@@ -50,6 +50,7 @@ impl TabletMapperApp {
                 enable_telemetry: true,
                 websocket: WebSocketConfig::default(),
                 antichatter: crate::domain::AntichatterConfig::default(),
+                speed_stats: crate::domain::SpeedStatsConfig::default(),
             }
         };
 
@@ -64,6 +65,7 @@ impl TabletMapperApp {
             hardware_size: RwLock::new((32767.0, 32767.0)),
             is_first_run: RwLock::new(is_first_run),
             packet_count: AtomicU32::new(0),
+            stats: RwLock::new(crate::drivers::DriverStats::default()),
         });
 
         let (tablet_sender, tablet_receiver) = crossbeam_channel::unbounded();

@@ -18,6 +18,7 @@ pub struct SharedState {
     pub hardware_size: RwLock<(f32, f32)>,
     pub is_first_run: RwLock<bool>,
     pub packet_count: AtomicU32,
+    pub stats: RwLock<crate::drivers::DriverStats>,
 }
 
 pub fn input_loop(
@@ -44,6 +45,10 @@ pub fn input_loop(
     filters.add(Box::new(
         crate::filters::antichatter::DevocubAntichatter::new(),
     ));
+    filters.add(Box::new(crate::filters::stats::SpeedStatsFilter::new(
+        Arc::clone(&shared),
+    )));
+    filters.update_config(&local_config);
 
     loop {
         // 1. Connection handling
@@ -108,6 +113,7 @@ pub fn input_loop(
                                 if current_version != local_config_version {
                                     local_config = shared.config.read().unwrap().clone();
                                     local_config_version = current_version;
+                                    filters.update_config(&local_config);
                                 }
                                 last_config_check = now;
                             }
@@ -273,6 +279,7 @@ pub fn input_loop(
                         if current_version != local_config_version {
                             local_config = shared.config.read().unwrap().clone();
                             local_config_version = current_version;
+                            filters.update_config(&local_config);
                         }
                     }
                     Err(_) => break, // Disconnected

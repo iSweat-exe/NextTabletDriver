@@ -1,10 +1,12 @@
 pub mod antichatter;
+pub mod stats;
 
 use crate::domain::MappingConfig;
 
 pub trait Filter: Send + Sync {
     fn name(&self) -> &'static str;
     fn process(&mut self, x: f32, y: f32, config: &MappingConfig) -> (f32, f32);
+    fn update_config(&mut self, _config: &MappingConfig) {}
     fn reset(&mut self);
 }
 
@@ -30,6 +32,12 @@ impl FilterPipeline {
             y = ny;
         }
         (x, y)
+    }
+
+    pub fn update_config(&mut self, config: &MappingConfig) {
+        for filter in &mut self.filters {
+            filter.update_config(config);
+        }
     }
 
     pub fn reset(&mut self) {

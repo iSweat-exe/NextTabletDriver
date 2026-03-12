@@ -15,7 +15,7 @@ const RELEASES: &[ReleaseEntry] = &[
         date: "12/03/2026",
         additions: &[
             "Add: 'Relative Mode' for pen input",
-            "Add: 'Filters' tab and 'Devocub Antichatter' settings like Open Tablet Driver Filters",
+            "Add: 'Filters' tab and 'Devocub Antichatter' settings like Open Tablet Driver Filters and 'HandSpeed WebSocket' settings",
         ],
         removals: &[
             "Remove: Crypto Donations",
@@ -25,7 +25,7 @@ const RELEASES: &[ReleaseEntry] = &[
             "Nothing"
         ],
         improvements: &[
-            "Nothing"
+            "Improve: 'HandSpeed WebSocket' filter to send 'total_distance' in addition to 'handspeed'"
         ],
     },
     ReleaseEntry {
