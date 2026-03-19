@@ -1,0 +1,62 @@
+use crate::app::state::TabletMapperApp;
+use eframe::egui;
+use std::sync::atomic::Ordering;
+
+pub fn render_footer(
+    app: &mut TabletMapperApp,
+    ctx: &egui::Context,
+    config: &mut crate::core::config::models::MappingConfig,
+) {
+    let tablet_name = app.shared.tablet_name.read().unwrap().clone();
+
+    egui::TopBottomPanel::bottom("footer")
+        .frame(
+            egui::Frame::none()
+                .fill(ctx.style().visuals.panel_fill)
+                .inner_margin(egui::Margin::symmetric(10.0, 5.0))
+                .stroke(egui::Stroke::new(1.0, egui::Color32::from_gray(220))),
+        )
+        .show(ctx, |ui| {
+            ui.horizontal(|ui| {
+                let mut current_mode = config.mode;
+                egui::ComboBox::from_id_salt("mode_combo")
+                    .selected_text(format!("{:?} Mode", current_mode))
+                    .show_ui(ui, |ui| {
+                        ui.selectable_value(
+                            &mut current_mode,
+                            crate::core::config::models::DriverMode::Absolute,
+                            "Absolute Mode",
+                        );
+                        ui.selectable_value(
+                            &mut current_mode,
+                            crate::core::config::models::DriverMode::Relative,
+                            "Relative Mode",
+                        );
+                    });
+
+                if current_mode != config.mode {
+                    config.mode = current_mode;
+                    app.shared.config_version.fetch_add(1, Ordering::SeqCst);
+                }
+
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    ui.label(
+                        egui::RichText::new(format!("V{}", crate::VERSION))
+                            .color(egui::Color32::GRAY)
+                            .strong(),
+                    );
+                    ui.add_space(8.0);
+
+                    ui.horizontal(|ui| {
+                        ui.label(egui::RichText::new(&app.profile_name).strong());
+                        ui.label("Profile:");
+                    });
+
+                    egui::ComboBox::from_id_salt("device_combo")
+                        .width(200.0)
+                        .selected_text(tablet_name)
+                        .show_ui(ui, |_| {});
+                });
+            });
+        });
+}

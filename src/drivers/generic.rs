@@ -1,0 +1,70 @@
+//! # Generic Tablet Driver
+//!
+//! This module implements a generic driver layer that unifies the interaction
+//! with all supported tablet models. It reads their JSON configurations, routes
+//! initialization patterns, and instantiates the correct specific data parser.
+
+use super::config::TabletConfiguration;
+use super::parsers::{create_parser, ReportParser};
+use super::{NextTabletDriver, TabletData};
+
+/// A universal wrapper implementing the `NextTabletDriver` trait.
+///
+/// Instead of writing a different `Driver` struct for every single tablet model,
+/// this generic struct uses the loaded `TabletConfiguration` to dynamically answer
+/// questions about its specs and routes the raw USB byte array `parse()` calls
+/// to the specific sub-parser (Wacom, Huion, XP-Pen, etc.) defined in the config.
+pub struct GenericNextTabletDriver {
+    config: TabletConfiguration,
+    vid: u16,
+    pid: u16,
+    parser: Box<dyn ReportParser>,
+}
+
+impl GenericNextTabletDriver {
+    pub fn new(config: TabletConfiguration, vid: u16, pid: u16) -> Self {
+        let parser_name = config
+            .digitizer_identifiers
+            .first()
+            .map(|d| d.report_parser.as_str())
+            .unwrap_or("");
+
+        let parser = create_parser(parser_name);
+
+        Self {
+            config,
+            vid,
+            pid,
+            parser,
+        }
+    }
+}
+
+impl NextTabletDriver for GenericNextTabletDriver {
+    fn get_name(&self) -> &str {
+        &self.config.name
+    }
+
+    fn get_specs(&self) -> (f32, f32, f32) {
+        (
+            self.config.specifications.digitizer.max_x,
+            self.config.specifications.digitizer.max_y,
+            self.config.specifications.pen.max_pressure as f32,
+        )
+    }
+
+    fn get_physical_specs(&self) -> (f32, f32) {
+        (
+            self.config.specifications.digitizer.width,
+            self.config.specifications.digitizer.height,
+        )
+    }
+
+    fn get_vid_pid(&self) -> (u16, u16) {
+        (self.vid, self.pid)
+    }
+
+    fn parse(&self, data: &[u8]) -> Option<TabletData> {
+        self.parser.parse(data)
+    }
+}
