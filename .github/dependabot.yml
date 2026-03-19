@@ -6,6 +6,6 @@ updates:
       interval: "weekly"
     commit-message:
       prefix: "deps"
-    open-pull-requests-limit: 0
+    open-pull-requests-limit: 10
     allow:
       - dependency-type: "all"
