@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Next Tablet Driver — High-Performance Tablet Driver for Windows</title>
+
+  <meta name="description" content="Next Tablet Driver is a free, open-source, user-mode drawing tablet driver written in Rust. Designed for osu! players and digital artists who demand ultra-low input lag on Windows."/>
+  <meta name="keywords" content="tablet driver, osu tablet driver, drawing tablet driver, low latency tablet, OpenTabletDriver alternative, Rust tablet driver, Windows tablet driver, HID driver, next tablet driver"/>
+  <meta name="author" content="iSweat-exe"/>
+  <meta name="robots" content="index, follow"/>
+  <link rel="canonical" href="https://next-tablet-driver.github.io/NextTabletDriver/"/>
+
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://next-tablet-driver.github.io/NextTabletDriver/"/>
+  <meta property="og:title" content="Next Tablet Driver — High-Performance Tablet Driver for Windows"/>
+  <meta property="og:description" content="Open-source tablet driver written in Rust. Ultra-low latency for osu! and digital art. Modern alternative to OpenTabletDriver."/>
+  <meta property="og:image" content="https://next-tablet-driver.github.io/NextTabletDriver/og-image.png"/>
+
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Next Tablet Driver"/>
+  <meta name="twitter:description" content="Open-source tablet driver in Rust. Ultra-low latency for osu! and drawing."/>
+  <meta name="twitter:image" content="https://next-tablet-driver.github.io/NextTabletDriver/og-image.png"/>
+
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Next Tablet Driver","operatingSystem":"Windows","applicationCategory":"UtilitiesApplication","description":"A high-performance user-mode drawing tablet driver written in Rust, designed to minimize input lag.","author":{"@type":"Person","name":"iSweat-exe"},"url":"https://next-tablet-driver.github.io/NextTabletDriver/","downloadUrl":"https://github.com/Next-Tablet-Driver/NextTabletDriver/releases/latest","license":"https://github.com/Next-Tablet-Driver/NextTabletDriver/blob/master/LICENSE","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+
+  <link rel="stylesheet" href="./assets/css/main.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">NTD<span>.</span></a>
+  <div class="nav-r">
+    <ul class="nav-links">
+      <li><a href="#screenshots">Interface</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="https://github.com/Next-Tablet-Driver/NextTabletDriver" target="_blank" rel="noopener">GitHub</a></li>
+    </ul>
+    <a class="nav-dl" href="https://github.com/Next-Tablet-Driver/NextTabletDriver/releases/latest/download/NextTabletDriver_Setup.exe" download>Download</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="hero-wm" aria-hidden="true">NTD</div>
+
+  <h1>
+    <span class="h1-line">Next Tablet</span>
+    <span class="h1-outline">Driver</span>
+  </h1>
+
+  <p class="hero-desc">
+    Tablet driver in Rust built for people who care about what happens between
+    their pen and the screen.
+  </p>
+
+  <div class="hero-actions">
+    <a class="btn btn-primary"
+       href="https://github.com/Next-Tablet-Driver/NextTabletDriver/releases/latest/download/NextTabletDriver_Setup.exe"
+       download>↓&nbsp; Download for Windows</a>
+    <a class="btn btn-ghost"
+       href="https://github.com/Next-Tablet-Driver/NextTabletDriver"
+       target="_blank" rel="noopener">GitHub →</a>
+  </div>
+  <p class="hero-ver" id="version-tag">Latest release: <strong>loading…</strong></p>
+</header>
+
+<!-- SCREENSHOTS -->
+<section class="section" id="screenshots">
+  <div class="lbl reveal"><div class="lbl-line"></div><span class="lbl-text">Interface</span></div>
+  <h2 class="reveal">Clean. Precise.<br><span class="h2-dim">Nothing extra.</span></h2>
+  <p class="sec-intro reveal d1">A minimal UI that stays out of your way. Configure your tablet in seconds and get back to what matters.</p>
+
+  <div class="sc-wrap reveal d2">
+    <div class="sc-row sc-row-1">
+      <div class="sc-card">
+        <div class="sc-img-wrap">
+          <div class="sc-placeholder">
+            <div class="sc-placeholder-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            </div>
+            <span class="sc-placeholder-text">Screenshot — Main panel</span>
+          </div>
+        </div>
+        <div class="sc-foot">
+          <div class="sc-dot"></div>
+          <span class="sc-lbl">Main panel — tablet area mapping & configuration</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sc-row sc-row-2">
+      <div class="sc-card">
+        <div class="sc-img-wrap">
+          <div class="sc-placeholder">
+            <div class="sc-placeholder-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <span class="sc-placeholder-text">Screenshot — Performance</span>
+          </div>
+        </div>
+        <div class="sc-foot"><div class="sc-dot"></div><span class="sc-lbl">Real-time performance monitor</span></div>
+      </div>
+
+      <div class="sc-card">
+        <div class="sc-img-wrap">
+          <div class="sc-placeholder">
+            <div class="sc-placeholder-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+            </div>
+            <span class="sc-placeholder-text">Screenshot — Device</span>
+          </div>
+        </div>
+        <div class="sc-foot"><div class="sc-dot"></div><span class="sc-lbl">Automatic HID device detection</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<div class="features-bg" id="features">
+  <section class="section">
+    <div class="lbl reveal"><div class="lbl-line"></div><span class="lbl-text">Why NTD</span></div>
+    <h2 class="reveal">Built for precision.<br><span class="h2-dim">Built for speed.</span></h2>
+
+    <div class="feat-grid reveal d1">
+      <div class="feat">
+        <div class="feat-n"><em>01</em></div>
+        <div class="feat-t">Open Source</div>
+        <p class="feat-d">The full source code is publicly available. Anyone can read it, contribute to it, or build from it.</p>
+        <span class="feat-tag">Open Source</span>
+      </div>
+
+      <div class="feat">
+        <div class="feat-n"><em>02</em></div>
+        <div class="feat-t">Built with Rust</div>
+        <p class="feat-d">Written in Rust from the start memory-safe by design, with the kind of performance that doesn't degrade over time.</p>
+        <span class="feat-tag">Rust</span>
+      </div>
+
+      <div class="feat">
+        <div class="feat-n"><em>03</em></div>
+        <div class="feat-t">Great for osu!</div>
+        <p class="feat-d">Raw input with sub-millisecond latency. Reliable, consistent, and out of your way when it matters.</p>
+        <span class="feat-tag">Gaming</span>
+      </div>
+
+      <div class="feat">
+        <div class="feat-n"><em>04</em></div>
+        <div class="feat-t">No kernel driver</div>
+        <p class="feat-d">Runs entirely in user space no system-level access needed, no stability risks, and removes itself cleanly when you're done.</p>
+        <span class="feat-tag">Windows</span>
+      </div>
+
+      <div class="feat">
+        <div class="feat-n"><em>05</em></div>
+        <div class="feat-t">Made for drawing too</div>
+        <p class="feat-d">Accurate area mapping and smooth pen input. Works well with Photoshop, Clip Studio Paint, Krita, and others.</p>
+        <span class="feat-tag">Art</span>
+      </div>
+
+      <div class="feat">
+        <div class="feat-n"><em>06</em></div>
+        <div class="feat-t">MIT Licensed</div>
+        <p class="feat-d">Free to use, modify, and redistribute. No strings attached read the code, fork it, make it yours.</p>
+        <span class="feat-tag">MIT</span>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="cta-glow" aria-hidden="true"></div>
+  <h2 class="reveal">Drop the lag.<br>Keep the precision.</h2>
+  <p class="reveal d1">Open source. No bloat.<br>Just your tablet, working the way it should.</p>
+  <a class="btn btn-primary reveal d2"
+     href="https://github.com/Next-Tablet-Driver/NextTabletDriver/releases/latest/download/NextTabletDriver_Setup.exe"
+     download>↓&nbsp; Download for Windows</a>
+  <span class="cta-sub reveal d2">Windows 10 / 11 &nbsp;·&nbsp; <span id="cta-version">Latest release</span></span>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-l">
+    <a href="#" class="ft-logo">Next Tablet Driver</a>
+    <ul class="ft-links">
+      <li><a href="https://github.com/Next-Tablet-Driver/NextTabletDriver" target="_blank" rel="noopener">GitHub</a></li>
+      <li><a href="https://github.com/Next-Tablet-Driver/NextTabletDriver/releases" target="_blank" rel="noopener">Releases</a></li>
+      <li><a href="https://github.com/Next-Tablet-Driver/NextTabletDriver/issues" target="_blank" rel="noopener">Issues</a></li>
+      <li><a href="https://github.com/Next-Tablet-Driver/NextTabletDriver/discussions" target="_blank" rel="noopener">Discussions</a></li>
+    </ul>
+  </div>
+  <span class="ft-copy">© 2026 iSweat-exe &nbsp;·&nbsp; MIT License</span>
+</footer>
+
+<script src="./assets/js/main.js"></script>
+</body>
+</html>
