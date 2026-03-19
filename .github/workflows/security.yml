@@ -1,0 +1,21 @@
+name: Security Audit
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1' # Monday morning
+  push:
+    paths:
+      - '**/Cargo.lock'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: rustsec/audit-check@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
