@@ -75,6 +75,45 @@ pub fn render_tablet_section(app: &TabletMapperApp, ui: &mut egui::Ui, config: &
             ui.painter()
                 .circle_filled(egui::pos2(aa_center_x, aa_center_y), 1.5, stroke_color);
 
+            if config.show_osu_playfield {
+                // Dynamic Osu! playfield calculation using actual Target Area (Screen Resolution)
+                // Proportionally maps 1316x1028 (at 1080p) to the user's specific monitor
+                let target_w = config.target_area.w;
+                let target_h = config.target_area.h;
+
+                let (pf_w, pf_h, y_offset_mm) = if target_w > 0.0 && target_h > 0.0 {
+                    let h = config.active_area.h * (1028.0 / target_h);
+                    let w = (target_h * (1316.0 / 1080.0) / target_w) * config.active_area.w;
+                    let offset = config.active_area.h * (18.0 / target_h);
+                    (w, h, offset)
+                } else {
+                    (0.0, 0.0, 0.0)
+                };
+
+                let pf_half_w = (pf_w * scale) / 2.0;
+                let pf_half_h = (pf_h * scale) / 2.0;
+                let pf_offset_y = y_offset_mm * scale;
+
+                let mut pf_points = vec![
+                    egui::pos2(-pf_half_w, -pf_half_h + pf_offset_y),
+                    egui::pos2(pf_half_w, -pf_half_h + pf_offset_y),
+                    egui::pos2(pf_half_w, pf_half_h + pf_offset_y),
+                    egui::pos2(-pf_half_w, pf_half_h + pf_offset_y),
+                ];
+
+                for p in &mut pf_points {
+                    let rx = p.x * cos - p.y * sin;
+                    let ry = p.x * sin + p.y * cos;
+                    *p = egui::pos2(rx + aa_center_x, ry + aa_center_y);
+                }
+
+                ui.painter().add(egui::Shape::convex_polygon(
+                    pf_points,
+                    egui::Color32::from_rgba_unmultiplied(255, 105, 180, 40),
+                    egui::Stroke::new(1.5, egui::Color32::from_rgb(255, 105, 180)),
+                ));
+            }
+
             let font_id = egui::FontId::proportional(11.0);
             let color = if ui.visuals().dark_mode {
                 egui::Color32::from_gray(20)
@@ -191,7 +230,11 @@ pub fn render_tablet_section(app: &TabletMapperApp, ui: &mut egui::Ui, config: &
     ui.horizontal(|ui| {
         ui.add_space(20.0);
         ui.vertical(|ui| {
-            ui.checkbox(&mut config.lock_aspect_ratio, "Force Aspect Ratio");
+            ui.horizontal(|ui| {
+                ui.checkbox(&mut config.lock_aspect_ratio, "Force Aspect Ratio");
+                ui.add_space(10.0);
+                ui.checkbox(&mut config.show_osu_playfield, "Show Osu!Playfield");
+            });
             ui.add_space(5.0);
             egui::Grid::new("tablet_grid")
                 .spacing(egui::vec2(10.0, 10.0))

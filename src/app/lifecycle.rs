@@ -76,6 +76,7 @@ impl TabletMapperApp {
                 speed_stats: crate::core::config::models::SpeedStatsConfig::default(),
                 theme: crate::core::config::models::ThemePreference::System,
                 lock_aspect_ratio: false,
+                show_osu_playfield: false,
             }
         };
 

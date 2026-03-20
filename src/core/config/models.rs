@@ -230,4 +230,6 @@ pub struct MappingConfig {
     pub theme: ThemePreference,
     #[serde(default)]
     pub lock_aspect_ratio: bool,
+    #[serde(default)]
+    pub show_osu_playfield: bool,
 }
