@@ -228,4 +228,6 @@ pub struct MappingConfig {
     pub websocket: WebSocketConfig,
     #[serde(default)]
     pub theme: ThemePreference,
+    #[serde(default)]
+    pub lock_aspect_ratio: bool,
 }

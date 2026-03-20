@@ -190,26 +190,53 @@ pub fn render_tablet_section(app: &TabletMapperApp, ui: &mut egui::Ui, config: &
 
     ui.horizontal(|ui| {
         ui.add_space(20.0);
-        egui::Grid::new("tablet_grid")
-            .spacing(egui::vec2(10.0, 10.0))
-            .show(ui, |ui| {
-                ui_input_box(ui, "Width", &mut config.active_area.w, "mm");
-                ui_input_box(ui, "Height", &mut config.active_area.h, "mm");
-                ui_input_box(ui, "X", &mut config.active_area.x, "mm");
-                ui_input_box(ui, "Y", &mut config.active_area.y, "mm");
-                ui_input_box(ui, "Rotation", &mut config.active_area.rotation, "°");
-                ui.end_row();
+        ui.vertical(|ui| {
+            ui.checkbox(&mut config.lock_aspect_ratio, "Force Aspect Ratio");
+            ui.add_space(5.0);
+            egui::Grid::new("tablet_grid")
+                .spacing(egui::vec2(10.0, 10.0))
+                .show(ui, |ui| {
+                    let mut w = config.active_area.w;
+                    let mut h = config.active_area.h;
 
-                config.active_area.w = config.active_area.w.clamp(1.0, phys_w);
-                config.active_area.h = config.active_area.h.clamp(1.0, phys_h);
-                config.active_area.x = config.active_area.x.clamp(
-                    config.active_area.w / 2.0,
-                    phys_w - config.active_area.w / 2.0,
-                );
-                config.active_area.y = config.active_area.y.clamp(
-                    config.active_area.h / 2.0,
-                    phys_h - config.active_area.h / 2.0,
-                );
-            });
+                    ui_input_box(ui, "Width", &mut w, "mm");
+                    if w != config.active_area.w {
+                        if config.lock_aspect_ratio {
+                            let ratio = config.active_area.w / config.active_area.h;
+                            config.active_area.w = w;
+                            config.active_area.h = (w / ratio).clamp(1.0, phys_h);
+                        } else {
+                            config.active_area.w = w;
+                        }
+                    }
+
+                    ui_input_box(ui, "Height", &mut h, "mm");
+                    if h != config.active_area.h {
+                        if config.lock_aspect_ratio {
+                            let ratio = config.active_area.w / config.active_area.h;
+                            config.active_area.h = h;
+                            config.active_area.w = (h * ratio).clamp(1.0, phys_w);
+                        } else {
+                            config.active_area.h = h;
+                        }
+                    }
+
+                    ui_input_box(ui, "X", &mut config.active_area.x, "mm");
+                    ui_input_box(ui, "Y", &mut config.active_area.y, "mm");
+                    ui_input_box(ui, "Rotation", &mut config.active_area.rotation, "°");
+                    ui.end_row();
+
+                    config.active_area.w = config.active_area.w.clamp(1.0, phys_w);
+                    config.active_area.h = config.active_area.h.clamp(1.0, phys_h);
+                    config.active_area.x = config.active_area.x.clamp(
+                        config.active_area.w / 2.0,
+                        phys_w - config.active_area.w / 2.0,
+                    );
+                    config.active_area.y = config.active_area.y.clamp(
+                        config.active_area.h / 2.0,
+                        phys_h - config.active_area.h / 2.0,
+                    );
+                });
+        });
     });
 }

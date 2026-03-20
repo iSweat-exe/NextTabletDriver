@@ -75,6 +75,7 @@ impl TabletMapperApp {
                 antichatter: crate::core::config::models::AntichatterConfig::default(),
                 speed_stats: crate::core::config::models::SpeedStatsConfig::default(),
                 theme: crate::core::config::models::ThemePreference::System,
+                lock_aspect_ratio: false,
             }
         };
 

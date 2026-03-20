@@ -11,6 +11,22 @@ struct ReleaseEntry {
 
 const RELEASES: &[ReleaseEntry] = &[
     ReleaseEntry {
+        version: "1.26.2003.01",
+        date: "20/03/2026",
+        additions: &[
+            "Add: 'Theme' settings in 'Settings' tab",
+        ],
+        removals: &[
+            "Nothing"
+        ],
+        fixes: &[
+            "Nothing"
+        ],
+        improvements: &[
+            "Improve: 'Theme' settings to allow changing the theme of the application"
+        ],
+    },
+    ReleaseEntry {
         version: "1.26.1903.03",
         date: "19/03/2026",
         additions: &[],
