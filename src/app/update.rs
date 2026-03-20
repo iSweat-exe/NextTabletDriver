@@ -121,6 +121,9 @@ impl eframe::App for TabletMapperApp {
 
         // Push config only if actually changed by UI inputs
         if config != initial_config {
+            if config.theme != initial_config.theme {
+                crate::ui::theme::apply_theme(ctx, config.theme);
+            }
             {
                 let mut shared_config = self.shared.config.write().unwrap();
                 *shared_config = config.clone();

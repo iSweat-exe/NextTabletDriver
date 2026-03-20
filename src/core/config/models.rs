@@ -38,6 +38,15 @@ pub enum DriverMode {
     Relative,
 }
 
+/// User preference for application theme.
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize, Default)]
+pub enum ThemePreference {
+    #[default]
+    System,
+    Light,
+    Dark,
+}
+
 /// Settings specific to `Relative` (mouse-like) driver mode.
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct RelativeConfig {
@@ -217,4 +226,6 @@ pub struct MappingConfig {
     pub run_at_startup: bool,
     #[serde(default)]
     pub websocket: WebSocketConfig,
+    #[serde(default)]
+    pub theme: ThemePreference,
 }

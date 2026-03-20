@@ -11,7 +11,10 @@ pub fn render_pen_settings_panel(
 
     let frame = egui::Frame::group(ui.style())
         .fill(crate::ui::theme::panel_bg(ui.visuals()))
-        .stroke(egui::Stroke::new(1.0, crate::ui::theme::panel_border(ui.visuals())))
+        .stroke(egui::Stroke::new(
+            1.0,
+            crate::ui::theme::panel_border(ui.visuals()),
+        ))
         .inner_margin(10.0);
 
     ui.horizontal(|ui| {

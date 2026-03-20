@@ -5,11 +5,29 @@
 //! It also provides reusable helper functions for consistent layout paradigms
 //! (like section headers and standardized input boxes) across panels.
 
+use crate::core::config::models::ThemePreference;
+
 use eframe::egui;
 
 /// Injects custom spacing, colors, and strokes into the `egui::Context`.
 /// Called once at application startup.
-pub fn apply_theme(ctx: &egui::Context) {
+/// Injects custom spacing, colors, and strokes into the `egui::Context`.
+/// Called once at application startup.
+pub fn apply_theme(ctx: &egui::Context, theme: ThemePreference) {
+    match theme {
+        ThemePreference::Light => ctx.set_visuals(egui::Visuals::light()),
+        ThemePreference::Dark => ctx.set_visuals(egui::Visuals::dark()),
+        ThemePreference::System => {
+            // In egui, if we don't set visuals, it follows system by default
+            // through eframe's initialization. However, if we want to toggle
+            // back to system after setting it, we might need to know what it was.
+            // For now, let's just default to egui's default visuals which is often Dark.
+            // A better way is to avoid setting visuals if it's already what we want.
+            // But since we are calling this when it changes, we can try:
+            ctx.set_visuals(egui::Visuals::default());
+        }
+    }
+
     // Custom style tweaks to match OTD closer
     let mut style = (*ctx.style()).clone();
 
@@ -62,11 +80,7 @@ pub fn ui_section_header(ui: &mut egui::Ui, title: &str) {
     let text_color = ui.visuals().strong_text_color();
     ui.horizontal(|ui| {
         ui.add_space(2.0);
-        ui.label(
-            egui::RichText::new(title)
-                .size(16.0)
-                .color(text_color),
-        );
+        ui.label(egui::RichText::new(title).size(16.0).color(text_color));
     });
     ui.add_space(2.0);
     ui.add(egui::Separator::default().spacing(8.0).grow(2.0));
@@ -184,11 +198,7 @@ pub fn ui_setting_row(ui: &mut egui::Ui, label: &str, value: &mut f32, unit: &st
         .show(ui, |ui| {
             ui.set_min_width(350.0);
             ui.horizontal(|ui| {
-                ui.label(
-                    egui::RichText::new(label)
-                        .size(11.0)
-                        .color(label_clr),
-                );
+                ui.label(egui::RichText::new(label).size(11.0).color(label_clr));
 
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                     if !unit.is_empty() {

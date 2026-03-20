@@ -13,7 +13,10 @@ pub fn render_settings_panel(
 
     let frame = egui::Frame::group(ui.style())
         .fill(crate::ui::theme::panel_bg(ui.visuals()))
-        .stroke(egui::Stroke::new(1.0, crate::ui::theme::panel_border(ui.visuals())))
+        .stroke(egui::Stroke::new(
+            1.0,
+            crate::ui::theme::panel_border(ui.visuals()),
+        ))
         .inner_margin(10.0);
 
     frame.show(ui, |ui| {
@@ -31,13 +34,40 @@ pub fn render_settings_panel(
                 config.run_at_startup = old_run_at_startup;
             }
         }
+
+        ui.add_space(8.0);
+        ui.horizontal(|ui| {
+            ui.label("Application Theme:");
+            egui::ComboBox::from_id_salt("theme_selector")
+                .selected_text(format!("{:?}", config.theme))
+                .show_ui(ui, |ui| {
+                    ui.selectable_value(
+                        &mut config.theme,
+                        crate::core::config::models::ThemePreference::System,
+                        "System",
+                    );
+                    ui.selectable_value(
+                        &mut config.theme,
+                        crate::core::config::models::ThemePreference::Light,
+                        "Light",
+                    );
+                    ui.selectable_value(
+                        &mut config.theme,
+                        crate::core::config::models::ThemePreference::Dark,
+                        "Dark",
+                    );
+                });
+        });
     });
 
     ui.add_space(10.0);
     ui_section_header(ui, "WebSocket Server");
     let ws_frame = egui::Frame::group(ui.style())
         .fill(crate::ui::theme::panel_bg(ui.visuals()))
-        .stroke(egui::Stroke::new(1.0, crate::ui::theme::panel_border(ui.visuals())))
+        .stroke(egui::Stroke::new(
+            1.0,
+            crate::ui::theme::panel_border(ui.visuals()),
+        ))
         .inner_margin(10.0);
 
     ws_frame.show(ui, |ui| {

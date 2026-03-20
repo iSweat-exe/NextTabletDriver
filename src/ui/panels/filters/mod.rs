@@ -20,7 +20,10 @@ pub fn render_filters_panel(
             |ui| {
                 egui::Frame::none()
                     .fill(crate::ui::theme::panel_bg(ui.visuals()))
-                    .stroke(egui::Stroke::new(1.0, crate::ui::theme::panel_border(ui.visuals())))
+                    .stroke(egui::Stroke::new(
+                        1.0,
+                        crate::ui::theme::panel_border(ui.visuals()),
+                    ))
                     .inner_margin(4.0)
                     .show(ui, |ui| {
                         ui.set_min_height(sidebar_height);

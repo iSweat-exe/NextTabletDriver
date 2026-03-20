@@ -16,7 +16,10 @@ pub fn render_display_section(
 
     egui::Frame::canvas(ui.style())
         .fill(crate::ui::theme::panel_bg(ui.visuals()))
-        .stroke(egui::Stroke::new(1.0, crate::ui::theme::panel_border(ui.visuals())))
+        .stroke(egui::Stroke::new(
+            1.0,
+            crate::ui::theme::panel_border(ui.visuals()),
+        ))
         .show(ui, |ui| {
             let available_w = ui.available_width();
             let viz_h = 200.0;
@@ -63,13 +66,14 @@ pub fn render_display_section(
                     ),
                     egui::vec2(config.target_area.w * scale, config.target_area.h * scale),
                 );
-                let stroke_color = if ui.visuals().dark_mode { egui::Color32::WHITE } else { egui::Color32::BLACK };
+                let stroke_color = if ui.visuals().dark_mode {
+                    egui::Color32::WHITE
+                } else {
+                    egui::Color32::BLACK
+                };
 
-                ui.painter().rect_filled(
-                    t_rect,
-                    0.0,
-                    crate::ui::theme::accent_bg(ui.visuals()),
-                );
+                ui.painter()
+                    .rect_filled(t_rect, 0.0, crate::ui::theme::accent_bg(ui.visuals()));
                 ui.painter()
                     .rect_stroke(t_rect, 0.0, egui::Stroke::new(1.0, stroke_color));
 
@@ -77,7 +81,11 @@ pub fn render_display_section(
                     .circle_filled(t_rect.center(), 1.5, stroke_color);
 
                 let font_id = egui::FontId::proportional(12.0);
-                let color = if ui.visuals().dark_mode { egui::Color32::from_gray(20) } else { egui::Color32::BLACK };
+                let color = if ui.visuals().dark_mode {
+                    egui::Color32::from_gray(20)
+                } else {
+                    egui::Color32::BLACK
+                };
 
                 ui.painter().text(
                     t_rect.center_top() + egui::vec2(0.0, 5.0),

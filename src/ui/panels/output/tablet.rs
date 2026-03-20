@@ -11,7 +11,10 @@ pub fn render_tablet_section(app: &TabletMapperApp, ui: &mut egui::Ui, config: &
 
     egui::Frame::canvas(ui.style())
         .fill(crate::ui::theme::panel_bg(ui.visuals()))
-        .stroke(egui::Stroke::new(1.0, crate::ui::theme::panel_border(ui.visuals())))
+        .stroke(egui::Stroke::new(
+            1.0,
+            crate::ui::theme::panel_border(ui.visuals()),
+        ))
         .show(ui, |ui| {
             let available_w = ui.available_width();
             let viz_h = 250.0;
@@ -30,8 +33,11 @@ pub fn render_tablet_section(app: &TabletMapperApp, ui: &mut egui::Ui, config: &
                 egui::pos2(offset_x, offset_y),
                 egui::vec2(draw_w, draw_h),
             );
-            ui.painter()
-                .rect_stroke(full_rect, 0.0, egui::Stroke::new(1.0, crate::ui::theme::panel_border(ui.visuals())));
+            ui.painter().rect_stroke(
+                full_rect,
+                0.0,
+                egui::Stroke::new(1.0, crate::ui::theme::panel_border(ui.visuals())),
+            );
 
             let aa_center_x = offset_x + config.active_area.x * scale;
             let aa_center_y = offset_y + config.active_area.y * scale;
@@ -55,21 +61,26 @@ pub fn render_tablet_section(app: &TabletMapperApp, ui: &mut egui::Ui, config: &
                 *p = egui::pos2(rx + aa_center_x, ry + aa_center_y);
             }
 
-            let stroke_color = if ui.visuals().dark_mode { egui::Color32::WHITE } else { egui::Color32::BLACK };
+            let stroke_color = if ui.visuals().dark_mode {
+                egui::Color32::WHITE
+            } else {
+                egui::Color32::BLACK
+            };
             ui.painter().add(egui::Shape::convex_polygon(
                 points.clone(),
                 crate::ui::theme::accent_bg(ui.visuals()),
                 egui::Stroke::new(1.0, stroke_color),
             ));
 
-            ui.painter().circle_filled(
-                egui::pos2(aa_center_x, aa_center_y),
-                1.5,
-                stroke_color,
-            );
+            ui.painter()
+                .circle_filled(egui::pos2(aa_center_x, aa_center_y), 1.5, stroke_color);
 
             let font_id = egui::FontId::proportional(11.0);
-            let color = if ui.visuals().dark_mode { egui::Color32::from_gray(20) } else { egui::Color32::BLACK };
+            let color = if ui.visuals().dark_mode {
+                egui::Color32::from_gray(20)
+            } else {
+                egui::Color32::BLACK
+            };
 
             let left_mid = egui::pos2(
                 (points[0].x + points[3].x) / 2.0,
@@ -164,7 +175,11 @@ pub fn render_tablet_section(app: &TabletMapperApp, ui: &mut egui::Ui, config: &
                 let cx = offset_x + (tablet_data.x as f32 / max_w) * phys_w * scale;
                 let cy = offset_y + (tablet_data.y as f32 / max_h) * phys_h * scale;
                 if full_rect.contains(egui::pos2(cx, cy)) {
-                    let cursor_color = if ui.visuals().dark_mode { egui::Color32::WHITE } else { egui::Color32::BLACK };
+                    let cursor_color = if ui.visuals().dark_mode {
+                        egui::Color32::WHITE
+                    } else {
+                        egui::Color32::BLACK
+                    };
                     ui.painter()
                         .circle_filled(egui::pos2(cx, cy), 3.0, cursor_color);
                 }

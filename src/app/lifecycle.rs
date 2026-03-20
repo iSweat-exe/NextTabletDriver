@@ -74,8 +74,12 @@ impl TabletMapperApp {
                 websocket: WebSocketConfig::default(),
                 antichatter: crate::core::config::models::AntichatterConfig::default(),
                 speed_stats: crate::core::config::models::SpeedStatsConfig::default(),
+                theme: crate::core::config::models::ThemePreference::System,
             }
         };
+
+        // Apply theme before shared state move
+        crate::ui::theme::apply_theme(&_ctx, config.theme);
 
         let shared = Arc::new(SharedState {
             config: RwLock::new(config),
