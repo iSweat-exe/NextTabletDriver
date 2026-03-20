@@ -56,6 +56,27 @@ pub fn render_settings_panel(
                         crate::core::config::models::ThemePreference::Dark,
                         "Dark",
                     );
+                    ui.separator();
+                    ui.selectable_value(
+                        &mut config.theme,
+                        crate::core::config::models::ThemePreference::CatppuccinLatte,
+                        "Catppuccin Latte",
+                    );
+                    ui.selectable_value(
+                        &mut config.theme,
+                        crate::core::config::models::ThemePreference::CatppuccinFrappe,
+                        "Catppuccin Frappe",
+                    );
+                    ui.selectable_value(
+                        &mut config.theme,
+                        crate::core::config::models::ThemePreference::CatppuccinMacchiato,
+                        "Catppuccin Macchiato",
+                    );
+                    ui.selectable_value(
+                        &mut config.theme,
+                        crate::core::config::models::ThemePreference::CatppuccinMocha,
+                        "Catppuccin Mocha",
+                    );
                 });
         });
     });

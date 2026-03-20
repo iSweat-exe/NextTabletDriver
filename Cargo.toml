@@ -24,6 +24,7 @@ crossbeam-channel = "0.5.15"
 include_dir = "0.7"
 tungstenite = { version = "0.26.1" }
 reqwest = { version = "0.12", features = ["blocking", "json"] }
+catppuccin-egui = { version = "5.7.0", default-features = false, features = ["egui29"] }
 
 # Windows
 [target.'cfg(windows)'.dependencies]

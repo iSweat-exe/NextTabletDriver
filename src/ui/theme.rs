@@ -12,30 +12,35 @@ use eframe::egui;
 /// Injects custom spacing, colors, and strokes into the `egui::Context`.
 /// Called once at application startup.
 /// Injects custom spacing, colors, and strokes into the `egui::Context`.
-/// Called once at application startup.
 pub fn apply_theme(ctx: &egui::Context, theme: ThemePreference) {
     match theme {
         ThemePreference::Light => ctx.set_visuals(egui::Visuals::light()),
         ThemePreference::Dark => ctx.set_visuals(egui::Visuals::dark()),
-        ThemePreference::System => {
-            // In egui, if we don't set visuals, it follows system by default
-            // through eframe's initialization. However, if we want to toggle
-            // back to system after setting it, we might need to know what it was.
-            // For now, let's just default to egui's default visuals which is often Dark.
-            // A better way is to avoid setting visuals if it's already what we want.
-            // But since we are calling this when it changes, we can try:
-            ctx.set_visuals(egui::Visuals::default());
+        ThemePreference::System => ctx.set_visuals(egui::Visuals::default()),
+        ThemePreference::CatppuccinLatte => catppuccin_egui::set_theme(ctx, catppuccin_egui::LATTE),
+        ThemePreference::CatppuccinFrappe => catppuccin_egui::set_theme(ctx, catppuccin_egui::FRAPPE),
+        ThemePreference::CatppuccinMacchiato => {
+            catppuccin_egui::set_theme(ctx, catppuccin_egui::MACCHIATO)
         }
+        ThemePreference::CatppuccinMocha => catppuccin_egui::set_theme(ctx, catppuccin_egui::MOCHA),
     }
 
-    // Custom style tweaks to match OTD closer
+    // Determine the accent color based on theme
+    let accent_color = match theme {
+        ThemePreference::CatppuccinLatte => catppuccin_egui::LATTE.blue,
+        ThemePreference::CatppuccinFrappe => catppuccin_egui::FRAPPE.blue,
+        ThemePreference::CatppuccinMacchiato => catppuccin_egui::MACCHIATO.blue,
+        ThemePreference::CatppuccinMocha => catppuccin_egui::MOCHA.blue,
+        _ => egui::Color32::from_rgb(0, 120, 215),
+    };
+
     let mut style = (*ctx.style()).clone();
 
     // Spacing
     style.spacing.item_spacing = egui::vec2(8.0, 8.0);
 
-    // Accent colors
-    let accent_color = egui::Color32::from_rgb(0, 120, 215);
+    // Only apply hardcoded accent overrides if NOT in Catppuccin (which handles its own widgets)
+    // Or if we want to ensure consistency, we apply it anyway but with the catppuccin accent color.
     style.visuals.widgets.active.bg_stroke = egui::Stroke::new(1.0, accent_color);
     style.visuals.selection.bg_fill = accent_color;
     style.visuals.selection.stroke = egui::Stroke::new(1.0, egui::Color32::WHITE);
@@ -45,19 +50,23 @@ pub fn apply_theme(ctx: &egui::Context, theme: ThemePreference) {
 
 /// Returns a color for panel backgrounds that adapts to dark/light mode.
 pub fn panel_bg(visuals: &egui::Visuals) -> egui::Color32 {
-    if visuals.dark_mode {
+    if visuals.window_fill == egui::Visuals::dark().window_fill {
         egui::Color32::from_gray(45)
-    } else {
+    } else if visuals.window_fill == egui::Visuals::light().window_fill {
         egui::Color32::from_gray(250)
+    } else {
+        visuals.panel_fill // Use the theme's own panel color (e.g., Mantle for Catppuccin)
     }
 }
 
 /// Returns a color for panel borders that adapts to dark/light mode.
 pub fn panel_border(visuals: &egui::Visuals) -> egui::Color32 {
-    if visuals.dark_mode {
+    if visuals.window_fill == egui::Visuals::dark().window_fill {
         egui::Color32::from_gray(60)
-    } else {
+    } else if visuals.window_fill == egui::Visuals::light().window_fill {
         egui::Color32::from_gray(235)
+    } else {
+        visuals.widgets.noninteractive.bg_stroke.color
     }
 }
 

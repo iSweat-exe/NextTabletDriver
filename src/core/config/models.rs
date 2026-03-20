@@ -45,6 +45,10 @@ pub enum ThemePreference {
     System,
     Light,
     Dark,
+    CatppuccinLatte,
+    CatppuccinFrappe,
+    CatppuccinMacchiato,
+    CatppuccinMocha,
 }
 
 /// Settings specific to `Relative` (mouse-like) driver mode.
