@@ -5,8 +5,8 @@
 
 use crate::core::config::models::MappingConfig;
 use crate::drivers::TabletData;
-use std::sync::atomic::AtomicU32;
 use std::sync::RwLock;
+use std::sync::atomic::AtomicU32;
 
 /// The central thread-safe state store for the application.
 ///

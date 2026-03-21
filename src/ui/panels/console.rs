@@ -60,10 +60,10 @@ pub fn render_console_panel(_app: &TabletMapperApp, ui: &mut egui::Ui) {
 
     ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
         ui.horizontal(|ui| {
-            if ui.button("Clear").clicked() {
-                if let Ok(mut entries) = crate::logger::LOG_BUFFER.write() {
-                    entries.clear();
-                }
+            if ui.button("Clear").clicked()
+                && let Ok(mut entries) = crate::logger::LOG_BUFFER.write()
+            {
+                entries.clear();
             }
 
             if ui.button("Copy All").clicked() {

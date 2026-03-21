@@ -70,14 +70,12 @@ impl Log for GlobalLogger {
             }
 
             // Only buffer allowed targets for the in-app UI to keep it clean and fast
-            if is_allowed {
-                if let Ok(mut entries) = self.entries.write() {
-                    entries.push(entry);
+            if is_allowed && let Ok(mut entries) = self.entries.write() {
+                entries.push(entry);
 
-                    // Cap the buffer at 500 entries to prevent memory issues
-                    if entries.len() > 500 {
-                        entries.remove(0);
-                    }
+                // Cap the buffer at 500 entries to prevent memory issues
+                if entries.len() > 500 {
+                    entries.remove(0);
                 }
             }
         }

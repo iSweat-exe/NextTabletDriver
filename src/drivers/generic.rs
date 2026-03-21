@@ -5,7 +5,7 @@
 //! initialization patterns, and instantiates the correct specific data parser.
 
 use super::config::TabletConfiguration;
-use super::parsers::{create_parser, ReportParser};
+use super::parsers::{ReportParser, create_parser};
 use super::{NextTabletDriver, TabletData};
 
 /// A universal wrapper implementing the `NextTabletDriver` trait.

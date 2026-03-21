@@ -21,29 +21,21 @@ const RELEASES: &[ReleaseEntry] = &[
         fixes: &[
             "Fix: Cleaned up and modernized the default egui UI design (borders, rounding, and hover effects)",
         ],
-        improvements: &[
-            "Improve: Improved theme-awareness for custom UI components",
-        ],
+        improvements: &["Improve: Improved theme-awareness for custom UI components"],
     },
     ReleaseEntry {
         version: "1.26.2003.01",
         date: "20/03/2026",
-        additions: &[
-            "Add: 'Theme' settings in 'Settings' tab",
-        ],
+        additions: &["Add: 'Theme' settings in 'Settings' tab"],
         removals: &[],
         fixes: &[],
-        improvements: &[
-            "Improve: 'Theme' settings to allow changing the theme of the application"
-        ],
+        improvements: &["Improve: 'Theme' settings to allow changing the theme of the application"],
     },
     ReleaseEntry {
         version: "1.26.1903.03",
         date: "19/03/2026",
         additions: &[],
-        removals: &[
-            "Remove: Powershell files, Payload.json",
-        ],
+        removals: &["Remove: Powershell files, Payload.json"],
         fixes: &[],
         improvements: &[
             "Next Tablet Driver now has a GitHub organization, the project has also been cleaned up for a better presentation in the future.",
@@ -53,13 +45,9 @@ const RELEASES: &[ReleaseEntry] = &[
         version: "1.26.1303.03",
         date: "13/03/2026",
         additions: &[],
-        removals: &[
-            "Remove: Telemetry System",
-        ],
+        removals: &["Remove: Telemetry System"],
         fixes: &[],
-        improvements: &[
-            "Internal Documentation",
-        ],
+        improvements: &["Internal Documentation"],
     },
     ReleaseEntry {
         version: "1.26.1203.01",
@@ -68,15 +56,10 @@ const RELEASES: &[ReleaseEntry] = &[
             "Add: 'Relative Mode' for pen input",
             "Add: 'Filters' tab and 'Devocub Antichatter' settings like Open Tablet Driver Filters and 'HandSpeed WebSocket' settings",
         ],
-        removals: &[
-            "Remove: Crypto Donations",
-            "Remove: 'Tools' tab"
-        ],
-        fixes: &[
-            "Nothing"
-        ],
+        removals: &["Remove: Crypto Donations", "Remove: 'Tools' tab"],
+        fixes: &["Nothing"],
         improvements: &[
-            "Improve: 'HandSpeed WebSocket' filter to send 'total_distance' in addition to 'handspeed'"
+            "Improve: 'HandSpeed WebSocket' filter to send 'total_distance' in addition to 'handspeed'",
         ],
     },
     ReleaseEntry {
@@ -85,17 +68,11 @@ const RELEASES: &[ReleaseEntry] = &[
         additions: &[
             "Add: Telemetry System for improvement (you can disable it in 'Settings' tab)",
             "Add: 'Relative Mode' for pen input",
-            "Info: The telemetry doesn't collect any personally identifiable information; it’s only there to improve the driver. An example of the shared data is available to view on GitHub."
+            "Info: The telemetry doesn't collect any personally identifiable information; it’s only there to improve the driver. An example of the shared data is available to view on GitHub.",
         ],
-        removals: &[
-            "Nothing"
-        ],
-        fixes: &[
-            "Change version format to European format instead of US format (MMDD -> DDMM)",
-        ],
-        improvements: &[
-            "Nothing"
-        ],
+        removals: &["Nothing"],
+        fixes: &["Change version format to European format instead of US format (MMDD -> DDMM)"],
+        improvements: &["Nothing"],
     },
     ReleaseEntry {
         version: "1.26.0303.03",
@@ -104,32 +81,22 @@ const RELEASES: &[ReleaseEntry] = &[
             "New 'Release' tab to track changes",
             "Added Support & Contribution panel with Crypto donations",
         ],
-        removals: &[
-            "Nothing"
-        ],
-        fixes: &[
-            "Fix all 'cargo clippy' issues and warnings (as mentioned in ISSUE#2)"
-        ],
+        removals: &["Nothing"],
+        fixes: &["Fix all 'cargo clippy' issues and warnings (as mentioned in ISSUE#2)"],
         improvements: &[
-            "Add 'CI/CD' pipeline for automated code quality checks (as mentioned in ISSUE#1)"
+            "Add 'CI/CD' pipeline for automated code quality checks (as mentioned in ISSUE#1)",
         ],
     },
     ReleaseEntry {
         version: "1.26.0301.05",
         date: "01/03/2026",
-        additions: &[
-            "New 'Websocket Server' settings in 'Settings' tab",
-        ],
-        removals: &[
-            "Nothing"
-        ],
+        additions: &["New 'Websocket Server' settings in 'Settings' tab"],
+        removals: &["Nothing"],
         fixes: &[
-            "Improved 'Run At Startup' feature, before it was not working properly and flagged by Windows Defender", 
-            "Improved HID API initialization performance"
+            "Improved 'Run At Startup' feature, before it was not working properly and flagged by Windows Defender",
+            "Improved HID API initialization performance",
         ],
-        improvements: &[
-            "Event-driven architecture for reduced CPU usage"
-        ],
+        improvements: &["Event-driven architecture for reduced CPU usage"],
     },
 ];
 

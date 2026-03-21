@@ -7,7 +7,7 @@
 use crate::core::config::models::{MappingConfig, SpeedUnit};
 use crate::engine::state::SharedState;
 use crate::filters::Filter;
-use crossbeam_channel::{unbounded, Sender};
+use crossbeam_channel::{Sender, unbounded};
 use std::net::TcpListener;
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -35,10 +35,11 @@ impl SpeedStatsFilter {
     }
 
     fn ensure_server_running(&mut self, ip: &str, port: u16) {
-        if let Some((current_ip, current_port)) = &self.current_config {
-            if current_ip == ip && *current_port == port {
-                return;
-            }
+        if let Some((current_ip, current_port)) = &self.current_config
+            && current_ip == ip
+            && *current_port == port
+        {
+            return;
         }
 
         // Restart or Start server
@@ -123,34 +124,34 @@ impl Filter for SpeedStatsFilter {
         let curr_x_mm = u * config.active_area.w;
         let curr_y_mm = v * config.active_area.h;
 
-        if let Some((last_x_mm, last_y_mm)) = self.last_pos {
-            if dt > 0.0001 {
-                // Avoid division by zero
-                let dx = curr_x_mm - last_x_mm;
-                let dy = curr_y_mm - last_y_mm;
-                let distance_mm = (dx * dx + dy * dy).sqrt();
+        if let Some((last_x_mm, last_y_mm)) = self.last_pos
+            && dt > 0.0001
+        {
+            // Avoid division by zero
+            let dx = curr_x_mm - last_x_mm;
+            let dy = curr_y_mm - last_y_mm;
+            let distance_mm = (dx * dx + dy * dy).sqrt();
 
-                let mut speed = distance_mm / dt; // mm/s
+            let mut speed = distance_mm / dt; // mm/s
 
-                // Convert to requested unit
-                speed = match conf.unit {
-                    SpeedUnit::MillimetersPerSecond => speed,
-                    SpeedUnit::MetersPerSecond => speed / 1000.0,
-                    SpeedUnit::KilometersPerHour => (speed / 1000.0) * 3.6,
-                    SpeedUnit::MilesPerHour => (speed / 1000.0) * 2.23694,
-                };
+            // Convert to requested unit
+            speed = match conf.unit {
+                SpeedUnit::MillimetersPerSecond => speed,
+                SpeedUnit::MetersPerSecond => speed / 1000.0,
+                SpeedUnit::KilometersPerHour => (speed / 1000.0) * 3.6,
+                SpeedUnit::MilesPerHour => (speed / 1000.0) * 2.23694,
+            };
 
-                // Update shared stats for UI
-                let mut current_total_dist = 0.0;
-                if let Ok(mut stats) = self.shared.stats.write() {
-                    stats.handspeed = speed;
-                    stats.total_distance_mm += distance_mm;
-                    current_total_dist = stats.total_distance_mm;
-                }
+            // Update shared stats for UI
+            let mut current_total_dist = 0.0;
+            if let Ok(mut stats) = self.shared.stats.write() {
+                stats.handspeed = speed;
+                stats.total_distance_mm += distance_mm;
+                current_total_dist = stats.total_distance_mm;
+            }
 
-                if let Some(tx) = &self.tx {
-                    let _ = tx.try_send((speed, current_total_dist));
-                }
+            if let Some(tx) = &self.tx {
+                let _ = tx.try_send((speed, current_total_dist));
             }
         }
 

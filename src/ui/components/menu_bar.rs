@@ -1,8 +1,8 @@
 use crate::app::state::TabletMapperApp;
 use crate::settings::save_last_session;
 use eframe::egui;
-use std::sync::atomic::Ordering;
 use std::sync::Arc;
+use std::sync::atomic::Ordering;
 
 pub fn render_menu_bar(app: &mut TabletMapperApp, ctx: &egui::Context) {
     egui::TopBottomPanel::top("menu_bar")
@@ -121,11 +121,10 @@ pub fn render_menu_bar(app: &mut TabletMapperApp, ctx: &egui::Context) {
                         if let Some(path) = rfd::FileDialog::new()
                             .add_filter("JSON", &["json"])
                             .pick_file()
+                            && let Ok(cfg) = crate::settings::load_settings_from_file(path)
                         {
-                            if let Ok(cfg) = crate::settings::load_settings_from_file(path) {
-                                let mut shared_config = app.shared.config.write().unwrap();
-                                *shared_config = cfg;
-                            }
+                            let mut shared_config = app.shared.config.write().unwrap();
+                            *shared_config = cfg;
                         }
                     }
                 });

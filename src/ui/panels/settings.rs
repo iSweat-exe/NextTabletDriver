@@ -27,11 +27,10 @@ pub fn render_settings_panel(
             .checkbox(&mut config.run_at_startup, "Run at startup")
             .on_hover_text("Automatically launch the application when Windows starts.")
             .changed()
+            && let Err(e) = crate::startup::set_run_at_startup(config.run_at_startup)
         {
-            if let Err(e) = crate::startup::set_run_at_startup(config.run_at_startup) {
-                log::error!(target: "App", "Failed to update startup setting: {}", e);
-                config.run_at_startup = old_run_at_startup;
-            }
+            log::error!(target: "App", "Failed to update startup setting: {}", e);
+            config.run_at_startup = old_run_at_startup;
         }
 
         ui.add_space(8.0);

@@ -5,9 +5,9 @@
 //! and bootstrapping the various concurrent systems (engine, websocket, updater).
 
 use display_info::DisplayInfo;
-use std::sync::atomic::AtomicU32;
 use std::sync::Arc;
 use std::sync::RwLock;
+use std::sync::atomic::AtomicU32;
 use std::thread;
 use std::time::Instant;
 

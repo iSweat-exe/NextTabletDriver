@@ -12,7 +12,7 @@ use std::time::Duration;
 
 use serde::Serialize;
 use tungstenite::protocol::WebSocket;
-use tungstenite::{accept, Message};
+use tungstenite::{Message, accept};
 
 use crate::engine::state::SharedState;
 
