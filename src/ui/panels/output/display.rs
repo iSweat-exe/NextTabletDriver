@@ -130,19 +130,19 @@ pub fn render_display_section(
                 let mut current_drag_delta =
                     ui.data_mut(|d| d.get_temp::<egui::Vec2>(drag_id).unwrap_or_default());
 
-                if response.dragged() {
-                    if let Some(pointer_pos) = response.interact_pointer_pos() {
-                        if t_rect.expand(20.0).contains(pointer_pos) || response.drag_started() {
-                            current_drag_delta += response.drag_delta() / scale;
-                            ui.data_mut(|d| d.insert_temp(drag_id, current_drag_delta));
+                if response.dragged()
+                    && let Some(pointer_pos) = response.interact_pointer_pos()
+                {
+                    if t_rect.expand(20.0).contains(pointer_pos) || response.drag_started() {
+                        current_drag_delta += response.drag_delta() / scale;
+                        ui.data_mut(|d| d.insert_temp(drag_id, current_drag_delta));
 
-                            config.target_area.x = (config.target_area.x
-                                + response.drag_delta().x / scale)
-                                .clamp(min_x, max_x - config.target_area.w);
-                            config.target_area.y = (config.target_area.y
-                                + response.drag_delta().y / scale)
-                                .clamp(min_y, max_y - config.target_area.h);
-                        }
+                        config.target_area.x = (config.target_area.x
+                            + response.drag_delta().x / scale)
+                            .clamp(min_x, max_x - config.target_area.w);
+                        config.target_area.y = (config.target_area.y
+                            + response.drag_delta().y / scale)
+                            .clamp(min_y, max_y - config.target_area.h);
                     }
                 } else if response.drag_stopped() {
                     ui.data_mut(|d| d.insert_temp(drag_id, egui::Vec2::ZERO));

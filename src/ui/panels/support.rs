@@ -6,12 +6,7 @@ pub fn render_support_panel(_app: &crate::app::state::TabletMapperApp, ui: &mut 
         ui.heading("Support & Contribution");
         ui.add_space(10.0);
 
-        ui.label(
-            egui::RichText::new(
-                "Thank you for considering a contribution! Your support helps keep this project alive.",
-            )
-            .size(16.0),
-        );
+        ui.label(egui::RichText::new("Thank you for considering a contribution! Your support helps keep this project alive.").size(16.0));
 
         ui.add_space(3.0);
 

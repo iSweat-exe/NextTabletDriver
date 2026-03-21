@@ -47,13 +47,12 @@ pub fn save_last_session(config: &MappingConfig) -> Result<(), String> {
 pub fn load_last_session() -> Option<MappingConfig> {
     let dir = get_settings_dir();
     let path = dir.join("last_session.json");
-    if path.exists() {
-        if let Ok(content) = fs::read_to_string(path) {
-            if let Ok(config) = serde_json::from_str(&content) {
-                log::info!(target: "Settings", "Loaded last session");
-                return Some(config);
-            }
-        }
+    if path.exists()
+        && let Ok(content) = fs::read_to_string(path)
+        && let Ok(config) = serde_json::from_str(&content)
+    {
+        log::info!(target: "Settings", "Loaded last session");
+        return Some(config);
     }
     None
 }

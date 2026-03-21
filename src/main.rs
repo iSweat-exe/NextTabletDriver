@@ -10,7 +10,7 @@ use eframe::egui;
 use next_tablet_driver::app::TabletMapperApp;
 use next_tablet_driver::logger;
 
-use windows_sys::Win32::Foundation::{GetLastError, ERROR_ALREADY_EXISTS, HANDLE};
+use windows_sys::Win32::Foundation::{ERROR_ALREADY_EXISTS, GetLastError, HANDLE};
 use windows_sys::Win32::System::Threading::CreateMutexW;
 
 /// The main entry point of the application.

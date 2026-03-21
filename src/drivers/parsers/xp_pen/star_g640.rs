@@ -1,5 +1,5 @@
-use crate::drivers::parsers::ReportParser;
 use crate::drivers::TabletData;
+use crate::drivers::parsers::ReportParser;
 
 pub struct XpPenStarG640Parser;
 

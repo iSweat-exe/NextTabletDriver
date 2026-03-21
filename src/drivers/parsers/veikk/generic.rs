@@ -1,5 +1,5 @@
-use crate::drivers::parsers::ReportParser;
 use crate::drivers::TabletData;
+use crate::drivers::parsers::ReportParser;
 
 pub struct VeikkParser;
 
@@ -30,11 +30,7 @@ impl ReportParser for VeikkParser {
             .join(" ");
 
         let status = if (data[2] & 0x20) != 0 {
-            if pressure > 0 {
-                "Contact"
-            } else {
-                "Hover"
-            }
+            if pressure > 0 { "Contact" } else { "Hover" }
         } else {
             "Out of Range"
         };

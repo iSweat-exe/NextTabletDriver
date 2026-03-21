@@ -5,7 +5,7 @@
 //! standard `TabletData` structures.
 
 use hidapi::{HidApi, HidDevice};
-use include_dir::{include_dir, Dir, DirEntry};
+use include_dir::{Dir, DirEntry, include_dir};
 use std::collections::HashSet;
 use std::fs;
 use std::path::Path;
@@ -135,15 +135,12 @@ fn load_embedded_recursive(
                 load_embedded_recursive(sub_dir, configs, names);
             }
             DirEntry::File(file) => {
-                if file.path().extension().and_then(|s| s.to_str()) == Some("json") {
-                    if let Some(content_str) = file.contents_utf8() {
-                        if let Ok(config) = serde_json::from_str::<TabletConfiguration>(content_str)
-                        {
-                            if !names.contains(&config.name) {
-                                configs.push(config);
-                            }
-                        }
-                    }
+                if file.path().extension().and_then(|s| s.to_str()) == Some("json")
+                    && let Some(content_str) = file.contents_utf8()
+                    && let Ok(config) = serde_json::from_str::<TabletConfiguration>(content_str)
+                    && !names.contains(&config.name)
+                {
+                    configs.push(config);
                 }
             }
         }
@@ -160,13 +157,12 @@ fn load_from_disk_recursive(
             let p = entry.path();
             if p.is_dir() {
                 load_from_disk_recursive(&p, configs, names);
-            } else if p.extension().and_then(|s| s.to_str()) == Some("json") {
-                if let Ok(content) = fs::read_to_string(&p) {
-                    if let Ok(config) = serde_json::from_str::<TabletConfiguration>(&content) {
-                        names.insert(config.name.clone());
-                        configs.push(config);
-                    }
-                }
+            } else if p.extension().and_then(|s| s.to_str()) == Some("json")
+                && let Ok(content) = fs::read_to_string(&p)
+                && let Ok(config) = serde_json::from_str::<TabletConfiguration>(&content)
+            {
+                names.insert(config.name.clone());
+                configs.push(config);
             }
         }
     }
@@ -197,36 +193,32 @@ pub fn detect_tablet(api: &HidApi) -> Option<(HidDevice, Box<dyn NextTabletDrive
                         Ok(device) => {
                             let open_duration = open_start.elapsed();
                             let mut init_success = true;
-                            use base64::{engine::general_purpose, Engine as _};
+                            use base64::{Engine as _, engine::general_purpose};
 
                             let init_start = Instant::now();
 
                             // Feature Reports
                             if let Some(reports) = &digitizer.feature_init_report {
                                 for report_str in reports {
-                                    if let Ok(data) = general_purpose::STANDARD.decode(report_str) {
-                                        if let Err(e) = device.send_feature_report(&data) {
-                                            log::error!(target: "Detect", "Init Error (Feature): {}", e);
-                                            init_success = false;
-                                            break;
-                                        }
+                                    if let Ok(data) = general_purpose::STANDARD.decode(report_str)
+                                        && let Err(e) = device.send_feature_report(&data)
+                                    {
+                                        log::error!(target: "Detect", "Init Error (Feature): {}", e);
+                                        init_success = false;
+                                        break;
                                     }
                                 }
                             }
 
                             // Output Reports
-                            if init_success {
-                                if let Some(reports) = &digitizer.output_init_report {
-                                    for report_str in reports {
-                                        if let Ok(data) =
-                                            general_purpose::STANDARD.decode(report_str)
-                                        {
-                                            if let Err(e) = device.write(&data) {
-                                                log::error!(target: "Detect", "Init Error (Output): {}", e);
-                                                init_success = false;
-                                                break;
-                                            }
-                                        }
+                            if init_success && let Some(reports) = &digitizer.output_init_report {
+                                for report_str in reports {
+                                    if let Ok(data) = general_purpose::STANDARD.decode(report_str)
+                                        && let Err(e) = device.write(&data)
+                                    {
+                                        log::error!(target: "Detect", "Init Error (Output): {}", e);
+                                        init_success = false;
+                                        break;
                                     }
                                 }
                             }

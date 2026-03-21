@@ -10,8 +10,8 @@ use crate::engine::pipeline::Pipeline;
 use crate::engine::state::SharedState;
 use crossbeam_channel::Sender;
 use eframe::egui;
-use std::sync::atomic::Ordering;
 use std::sync::Arc;
+use std::sync::atomic::Ordering;
 use std::thread;
 use std::time::{Duration, Instant};
 

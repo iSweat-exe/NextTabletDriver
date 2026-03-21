@@ -60,10 +60,10 @@ pub fn render_stats_settings(app: &TabletMapperApp, ui: &mut egui::Ui, config: &
                             .strong(),
                     );
 
-                    if ui.button("Reset").clicked() {
-                        if let Ok(mut stats) = app.shared.stats.write() {
-                            stats.total_distance_mm = 0.0;
-                        }
+                    if ui.button("Reset").clicked()
+                        && let Ok(mut stats) = app.shared.stats.write()
+                    {
+                        stats.total_distance_mm = 0.0;
                     }
                 });
             });
