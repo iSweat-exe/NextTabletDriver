@@ -128,7 +128,7 @@ pub fn render_update_dialog(app: &mut TabletMapperApp, ctx: &egui::Context) {
                                                 .color(egui::Color32::BLACK),
                                         )
                                         .fill(egui::Color32::from_rgb(0, 120, 215)) // #0078d7
-                                        .corner_radius(6.0)
+                                        .corner_radius(4.0)
                                         .min_size(egui::vec2(160.0, 36.0));
 
                                         if ui.add(update_btn).clicked() {

@@ -172,7 +172,7 @@ pub fn render_debugger_panel(shared: Arc<SharedState>, displayed_hz: f32, ui: &m
 fn status_card(ui: &mut egui::Ui, label: &str, value: &str, color: egui::Color32) {
     egui::Frame::new()
         .fill(egui::Color32::from_gray(28))
-        .corner_radius(6.0)
+        .corner_radius(4.0)
         .inner_margin(12.0)
         .show(ui, |ui: &mut egui::Ui| {
             ui.set_width(ui.available_width());

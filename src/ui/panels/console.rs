@@ -32,7 +32,7 @@ pub fn render_console_panel(app: &mut TabletMapperApp, ui: &mut egui::Ui) {
             )
             .fill(fill_color)
             .stroke(egui::Stroke::new(1.0, stroke_color))
-            .corner_radius(6.0);
+            .corner_radius(4.0);
 
             if ui.add(button).clicked() {
                 *selected = !*selected;

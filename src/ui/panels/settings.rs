@@ -1,6 +1,6 @@
 use crate::app::state::TabletMapperApp;
 use crate::core::config::models::MappingConfig;
-use crate::ui::theme::ui_section_header;
+use crate::ui::theme::{ui_input_box_u32, ui_input_box_u16, panel_bg, panel_border};
 use eframe::egui;
 
 pub fn render_settings_panel(
@@ -8,20 +8,10 @@ pub fn render_settings_panel(
     ui: &mut egui::Ui,
     config: &mut MappingConfig,
 ) {
-    ui.add_space(10.0);
-    ui_section_header(ui, "General Settings");
+    ui.add_space(15.0);
 
-    let frame = egui::Frame::group(ui.style())
-        .fill(crate::ui::theme::panel_bg(ui.visuals()))
-        .stroke(egui::Stroke::new(
-            1.0,
-            crate::ui::theme::panel_border(ui.visuals()),
-        ))
-        .inner_margin(10.0);
-
-    frame.show(ui, |ui| {
-        ui.set_width(ui.available_width());
-
+    // --- GENERAL SETTINGS CARD ---
+    render_card(ui, "General Settings", egui_phosphor::regular::GEAR_SIX, |ui| {
         let old_run_at_startup = config.run_at_startup;
         if ui
             .checkbox(&mut config.run_at_startup, "Run at startup")
@@ -40,93 +30,94 @@ pub fn render_settings_panel(
         )
         .on_hover_text("Hide the application to the system tray when minimized.");
 
-        ui.add_space(8.0);
+        ui.add_space(12.0);
         ui.horizontal(|ui| {
-            ui.label("Application Theme:");
+            ui.label(egui::RichText::new("Application Theme").strong());
+            ui.add_space(10.0);
+            
             egui::ComboBox::from_id_salt("theme_selector")
                 .selected_text(format!("{:?}", config.theme))
                 .show_ui(ui, |ui| {
-                    ui.selectable_value(
-                        &mut config.theme,
-                        crate::core::config::models::ThemePreference::System,
-                        "System",
-                    );
-                    ui.selectable_value(
-                        &mut config.theme,
-                        crate::core::config::models::ThemePreference::Light,
-                        "Light",
-                    );
-                    ui.selectable_value(
-                        &mut config.theme,
-                        crate::core::config::models::ThemePreference::Dark,
-                        "Dark",
-                    );
+                    ui.selectable_value(&mut config.theme, crate::core::config::models::ThemePreference::System, "System");
+                    ui.selectable_value(&mut config.theme, crate::core::config::models::ThemePreference::Light, "Light");
+                    ui.selectable_value(&mut config.theme, crate::core::config::models::ThemePreference::Dark, "Dark");
                     ui.separator();
-                    ui.selectable_value(
-                        &mut config.theme,
-                        crate::core::config::models::ThemePreference::CatppuccinLatte,
-                        "Catppuccin Latte",
-                    );
-                    ui.selectable_value(
-                        &mut config.theme,
-                        crate::core::config::models::ThemePreference::CatppuccinFrappe,
-                        "Catppuccin Frappe",
-                    );
-                    ui.selectable_value(
-                        &mut config.theme,
-                        crate::core::config::models::ThemePreference::CatppuccinMacchiato,
-                        "Catppuccin Macchiato",
-                    );
-                    ui.selectable_value(
-                        &mut config.theme,
-                        crate::core::config::models::ThemePreference::CatppuccinMocha,
-                        "Catppuccin Mocha",
-                    );
+                    ui.selectable_value(&mut config.theme, crate::core::config::models::ThemePreference::CatppuccinLatte, "Catppuccin Latte");
+                    ui.selectable_value(&mut config.theme, crate::core::config::models::ThemePreference::CatppuccinFrappe, "Catppuccin Frappe");
+                    ui.selectable_value(&mut config.theme, crate::core::config::models::ThemePreference::CatppuccinMacchiato, "Catppuccin Macchiato");
+                    ui.selectable_value(&mut config.theme, crate::core::config::models::ThemePreference::CatppuccinMocha, "Catppuccin Mocha");
                 });
         });
     });
 
-    ui.add_space(10.0);
-    ui_section_header(ui, "WebSocket Server");
-    let ws_frame = egui::Frame::group(ui.style())
-        .fill(crate::ui::theme::panel_bg(ui.visuals()))
-        .stroke(egui::Stroke::new(
-            1.0,
-            crate::ui::theme::panel_border(ui.visuals()),
-        ))
-        .inner_margin(10.0);
+    ui.add_space(15.0);
 
-    ws_frame.show(ui, |ui| {
-        ui.set_width(ui.available_width());
-
+    // --- WEBSOCKET SERVER CARD ---
+    render_card(ui, "WebSocket Server", egui_phosphor::regular::WIFI_HIGH, |ui| {
         ui.horizontal(|ui| {
             ui.checkbox(&mut config.websocket.enabled, "Enable WebSocket Server");
-            if config.websocket.enabled {
-                ui.label(egui::RichText::new("Running").color(egui::Color32::from_rgb(0, 200, 0)));
-            } else {
-                ui.label(egui::RichText::new("Stopped").color(egui::Color32::RED));
-            }
+            
+            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                let (text, color) = if config.websocket.enabled {
+                    ("RUNNING", egui::Color32::from_rgb(166, 227, 161))
+                } else {
+                    ("STOPPED", egui::Color32::from_rgb(243, 139, 168))
+                };
+
+                // Status Badge
+                egui::Frame::new()
+                    .fill(color.gamma_multiply(0.1))
+                    .stroke(egui::Stroke::new(1.0, color.gamma_multiply(0.5)))
+                    .corner_radius(4.0)
+                    .inner_margin(egui::Margin::symmetric(8, 2))
+                    .show(ui, |ui| {
+                        ui.label(egui::RichText::new(text).color(color).size(10.0).strong());
+                    });
+            });
         });
+
+        ui.add_space(12.0);
 
         ui.add_enabled_ui(config.websocket.enabled, |ui| {
             ui.horizontal(|ui| {
-                ui.label("Port:");
-                ui.add(egui::DragValue::new(&mut config.websocket.port).range(1024..=65535));
-
-                ui.add_space(20.0);
-
-                ui.label("Polling Rate (Hz):");
-                ui.add(egui::DragValue::new(&mut config.websocket.polling_rate_hz).range(1..=1000));
+                ui_input_box_u16(ui, "Port", &mut config.websocket.port, "");
+                ui.add_space(10.0);
+                ui_input_box_u32(ui, "Rate", &mut config.websocket.polling_rate_hz, "Hz");
             });
 
-            ui.add_space(5.0);
-            ui.label("Payload Data:");
+            ui.add_space(15.0);
+            ui.label(egui::RichText::new("Payload Data").weak().size(11.0));
+            ui.add_space(4.0);
+            
             ui.horizontal(|ui| {
-                ui.checkbox(&mut config.websocket.send_coordinates, "Coordinates");
+                ui.checkbox(&mut config.websocket.send_coordinates, "Coords");
                 ui.checkbox(&mut config.websocket.send_pressure, "Pressure");
                 ui.checkbox(&mut config.websocket.send_tilt, "Tilt");
-                ui.checkbox(&mut config.websocket.send_status, "Status & Keys");
+                ui.checkbox(&mut config.websocket.send_status, "Status");
             });
         });
     });
+}
+
+fn render_card<R>(ui: &mut egui::Ui, title: &str, icon: &str, add_contents: impl FnOnce(&mut egui::Ui) -> R) {
+    let visuals = ui.visuals();
+    let card_bg = panel_bg(visuals).gamma_multiply(0.6);
+    let border_color = panel_border(visuals).gamma_multiply(0.4);
+
+    egui::Frame::new()
+        .fill(card_bg)
+        .corner_radius(4.0)
+        .stroke(egui::Stroke::new(1.0, border_color))
+        .inner_margin(egui::Margin::symmetric(20, 15))
+        .show(ui, |ui| {
+            ui.set_width(ui.available_width());
+            ui.vertical(|ui| {
+                ui.horizontal(|ui| {
+                    ui.label(egui::RichText::new(format!("{} {}", icon, title)).size(15.0).strong());
+                });
+
+                ui.add_space(12.0);
+                add_contents(ui);
+            });
+        });
 }

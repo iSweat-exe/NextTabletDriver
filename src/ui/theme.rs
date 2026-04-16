@@ -131,7 +131,6 @@ pub fn ui_input_box(ui: &mut egui::Ui, label: &str, value: &mut f32, unit: &str)
     let label_clr = label_color(visuals);
 
     ui.scope(|ui| {
-        // Softer styling for the DragValue within the pill
         ui.style_mut().visuals.widgets.inactive.bg_fill = egui::Color32::from_white_alpha(8);
         ui.style_mut().visuals.widgets.hovered.bg_fill = egui::Color32::from_white_alpha(15);
         ui.style_mut().visuals.widgets.active.bg_fill = egui::Color32::from_white_alpha(20);
@@ -141,12 +140,12 @@ pub fn ui_input_box(ui: &mut egui::Ui, label: &str, value: &mut f32, unit: &str)
             .fill(bg_fill)
             .corner_radius(4.0)
             .stroke(egui::Stroke::new(1.0, border_color.gamma_multiply(0.6)))
-            .inner_margin(egui::Margin::symmetric(12, 6))
+            .inner_margin(egui::Margin::symmetric(10, 5))
             .show(ui, |ui| {
-                ui.set_min_width(130.0);
+                ui.set_width(140.0);
                 ui.horizontal(|ui| {
                     ui.label(egui::RichText::new(label).size(11.0).color(label_clr).strong());
-
+                    
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                         if !unit.is_empty() {
                             ui.label(egui::RichText::new(unit).size(10.0).color(label_clr.gamma_multiply(0.5)));
@@ -173,8 +172,8 @@ pub fn ui_input_box(ui: &mut egui::Ui, label: &str, value: &mut f32, unit: &str)
     });
 }
 
-/// Renders a styled container holding a label and a `u32` DragValue input.
-pub fn ui_input_box_u32(ui: &mut egui::Ui, label: &str, value: &mut u32, unit: &str) {
+/// Renders a styled container holding a label and a `u32` DragValue input with an optional range.
+pub fn ui_input_box_u32_range(ui: &mut egui::Ui, label: &str, value: &mut u32, unit: &str, range: std::ops::RangeInclusive<u32>) {
     let visuals = ui.visuals();
     let bg_fill = panel_bg(visuals);
     let border_color = panel_border(visuals);
@@ -187,11 +186,11 @@ pub fn ui_input_box_u32(ui: &mut egui::Ui, label: &str, value: &mut u32, unit: &
 
         egui::Frame::new()
             .fill(bg_fill)
-            .corner_radius(8.0)
+            .corner_radius(4.0)
             .stroke(egui::Stroke::new(1.0, border_color.gamma_multiply(0.6)))
-            .inner_margin(egui::Margin::symmetric(12, 6))
+            .inner_margin(egui::Margin::symmetric(10, 5))
             .show(ui, |ui| {
-                ui.set_min_width(130.0);
+                ui.set_width(140.0);
                 ui.horizontal(|ui| {
                     ui.label(egui::RichText::new(label).size(11.0).color(label_clr).strong());
 
@@ -201,7 +200,7 @@ pub fn ui_input_box_u32(ui: &mut egui::Ui, label: &str, value: &mut u32, unit: &
                             ui.add_space(2.0);
                         }
 
-                        let response = ui.add(egui::DragValue::new(value).speed(1.0));
+                        let response = ui.add(egui::DragValue::new(value).speed(1.0).range(range));
                         if response.hovered() {
                             ui.output_mut(|o| o.cursor_icon = egui::CursorIcon::ResizeHorizontal);
                         }
@@ -209,6 +208,52 @@ pub fn ui_input_box_u32(ui: &mut egui::Ui, label: &str, value: &mut u32, unit: &
                 });
             });
     });
+}
+
+pub fn ui_input_box_u32(ui: &mut egui::Ui, label: &str, value: &mut u32, unit: &str) {
+    ui_input_box_u32_range(ui, label, value, unit, 0..=u32::MAX);
+}
+
+/// Renders a styled container holding a label and a `u16` DragValue input with an optional range.
+pub fn ui_input_box_u16_range(ui: &mut egui::Ui, label: &str, value: &mut u16, unit: &str, range: std::ops::RangeInclusive<u16>) {
+    let visuals = ui.visuals();
+    let bg_fill = panel_bg(visuals);
+    let border_color = panel_border(visuals);
+    let label_clr = label_color(visuals);
+
+    ui.scope(|ui| {
+        ui.style_mut().visuals.widgets.inactive.bg_fill = egui::Color32::from_white_alpha(8);
+        ui.style_mut().visuals.widgets.hovered.bg_fill = egui::Color32::from_white_alpha(15);
+        ui.style_mut().spacing.button_padding = egui::vec2(6.0, 2.0);
+
+        egui::Frame::new()
+            .fill(bg_fill)
+            .corner_radius(4.0)
+            .stroke(egui::Stroke::new(1.0, border_color.gamma_multiply(0.6)))
+            .inner_margin(egui::Margin::symmetric(10, 5))
+            .show(ui, |ui| {
+                ui.set_width(140.0);
+                ui.horizontal(|ui| {
+                    ui.label(egui::RichText::new(label).size(11.0).color(label_clr).strong());
+
+                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        if !unit.is_empty() {
+                            ui.label(egui::RichText::new(unit).size(10.0).color(label_clr.gamma_multiply(0.5)));
+                            ui.add_space(2.0);
+                        }
+
+                        let response = ui.add(egui::DragValue::new(value).speed(1.0).range(range));
+                        if response.hovered() {
+                            ui.output_mut(|o| o.cursor_icon = egui::CursorIcon::ResizeHorizontal);
+                        }
+                    });
+                });
+            });
+    });
+}
+
+pub fn ui_input_box_u16(ui: &mut egui::Ui, label: &str, value: &mut u16, unit: &str) {
+    ui_input_box_u16_range(ui, label, value, unit, 0..=u16::MAX);
 }
 
 /// Renders a wide, right-aligned setting row typically used in the Filters tab.
@@ -228,7 +273,7 @@ pub fn ui_setting_row(ui: &mut egui::Ui, label: &str, value: &mut f32, unit: &st
 
         egui::Frame::new()
             .fill(bg_fill)
-            .corner_radius(8.0)
+            .corner_radius(4.0)
             .stroke(egui::Stroke::new(1.0, border_color.gamma_multiply(0.6)))
             .inner_margin(egui::Margin::symmetric(14, 8))
             .show(ui, |ui| {
@@ -261,4 +306,28 @@ pub fn ui_setting_row(ui: &mut egui::Ui, label: &str, value: &mut f32, unit: &st
                 });
             });
     });
+}
+
+/// Renders a standard modern card for grouping settings.
+pub fn ui_card<R>(ui: &mut egui::Ui, title: &str, icon: &str, add_contents: impl FnOnce(&mut egui::Ui) -> R) {
+    let visuals = ui.visuals();
+    let card_bg = panel_bg(visuals).gamma_multiply(0.6);
+    let border_color = panel_border(visuals).gamma_multiply(0.4);
+
+    egui::Frame::new()
+        .fill(card_bg)
+        .corner_radius(4.0)
+        .stroke(egui::Stroke::new(1.0, border_color))
+        .inner_margin(egui::Margin::symmetric(20, 15))
+        .show(ui, |ui| {
+            ui.set_width(ui.available_width());
+            ui.vertical(|ui| {
+                ui.horizontal(|ui| {
+                    ui.label(egui::RichText::new(format!("{} {}", icon, title)).size(14.0).strong());
+                });
+
+                ui.add_space(10.0);
+                add_contents(ui);
+            });
+        });
 }

@@ -139,10 +139,11 @@ fn render_release_entry(ui: &mut egui::Ui, entry: &ReleaseEntry) {
 
     egui::Frame::new()
         .fill(card_bg)
-        .corner_radius(12.0)
+        .corner_radius(4.0)
         .stroke(egui::Stroke::new(1.0, border_color))
         .inner_margin(egui::Margin::symmetric(20, 15))
         .show(ui, |ui| {
+            ui.set_width(ui.available_width());
             ui.vertical(|ui| {
                 // Header (Version & Date)
                 ui.horizontal(|ui| {
