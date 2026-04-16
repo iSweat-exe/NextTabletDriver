@@ -115,30 +115,40 @@ impl eframe::App for TabletMapperApp {
         crate::ui::components::footer::render_footer(self, ctx, &mut config);
 
         // 4. Central Content
-        egui::CentralPanel::default().show(ctx, |ui| {
-            egui::ScrollArea::vertical().show(ui, |ui| match self.active_tab {
-                AppTab::Output => {
+        egui::CentralPanel::default().show(ctx, |ui| match self.active_tab {
+            AppTab::Output => {
+                egui::ScrollArea::vertical().show(ui, |ui| {
                     render_output_panel(self, ui, &mut config, min_x, min_y, max_x, max_y);
-                }
-                AppTab::Filters => {
+                });
+            }
+            AppTab::Filters => {
+                egui::ScrollArea::vertical().show(ui, |ui| {
                     render_filters_panel(self, ui, &mut config);
-                }
-                AppTab::PenSettings => {
+                });
+            }
+            AppTab::PenSettings => {
+                egui::ScrollArea::vertical().show(ui, |ui| {
                     render_pen_settings_panel(self, ui, &mut config);
-                }
-                AppTab::Console => {
-                    render_console_panel(self, ui);
-                }
-                AppTab::Settings => {
+                });
+            }
+            AppTab::Console => {
+                render_console_panel(self, ui);
+            }
+            AppTab::Settings => {
+                egui::ScrollArea::vertical().show(ui, |ui| {
                     render_settings_panel(self, ui, &mut config);
-                }
-                AppTab::Support => {
+                });
+            }
+            AppTab::Support => {
+                egui::ScrollArea::vertical().show(ui, |ui| {
                     render_support_panel(self, ui);
-                }
-                AppTab::Release => {
+                });
+            }
+            AppTab::Release => {
+                egui::ScrollArea::vertical().show(ui, |ui| {
                     render_release_panel(self, ui);
-                }
-            });
+                });
+            }
         });
 
         // Push config only if actually changed by UI inputs

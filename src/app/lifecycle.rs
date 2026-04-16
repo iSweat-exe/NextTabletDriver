@@ -229,6 +229,12 @@ impl TabletMapperApp {
             max_ui_latency_ms: 0.0,
             avg_ui_latency_ms: 0.0,
             was_minimized: false,
+            console_search: String::new(),
+            console_show_info: true,
+            console_show_warn: true,
+            console_show_error: true,
+            console_show_debug: true,
+            console_autoscroll: true,
             tray_icon,
         }
     }

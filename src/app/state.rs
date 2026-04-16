@@ -85,6 +85,14 @@ pub struct TabletMapperApp {
     pub avg_ui_latency_ms: f32,
 
     pub was_minimized: bool,
+    
+    // Console State
+    pub console_search: String,
+    pub console_show_info: bool,
+    pub console_show_warn: bool,
+    pub console_show_error: bool,
+    pub console_show_debug: bool,
+    pub console_autoscroll: bool,
 
     // System Tray
     /// Optional tray icon instance to keep it alive.
