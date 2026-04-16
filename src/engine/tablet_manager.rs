@@ -33,7 +33,7 @@ use std::time::{Duration, Instant};
 /// 5. **Disconnection Hook**: If reading fails, cleans up state and drops back to detection loop.
 pub fn run_manager(
     shared: Arc<SharedState>,
-    ctx: egui::Context,
+    _ctx: egui::Context,
     tablet_sender: Sender<crate::drivers::TabletData>,
 ) {
     log::info!(target: "TabletManager", "Starting device manager thread");
@@ -162,7 +162,6 @@ pub fn run_manager(
 
                             // Inject UI updates
                             let _ = tablet_sender.send(data.clone());
-                            ctx.request_repaint();
                         }
                     }
                     Ok(_) => {
