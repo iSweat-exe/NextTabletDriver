@@ -6,13 +6,13 @@ pub fn render_console_panel(app: &mut TabletMapperApp, ui: &mut egui::Ui) {
 
     // --- CONSOLE HEADER (Filters & Search) ---
     ui.horizontal(|ui| {
-        ui.label("🔍");
+        ui.label(egui_phosphor::regular::MAGNIFYING_GLASS);
         ui.add(
             egui::TextEdit::singleline(&mut app.console_search)
                 .hint_text("Search logs...")
                 .desired_width(200.0),
         );
-        if ui.button("❌").clicked() {
+        if ui.button(egui_phosphor::regular::X).clicked() {
             app.console_search.clear();
         }
 
@@ -159,7 +159,7 @@ pub fn render_console_panel(app: &mut TabletMapperApp, ui: &mut egui::Ui) {
     // 2. Footer Area
     ui.horizontal(|ui| {
         if ui
-            .button(egui::RichText::new("🗑 Clear Console").color(egui::Color32::from_rgb(243, 139, 168)))
+            .button(egui::RichText::new(format!("{} Clear Console", egui_phosphor::regular::TRASH)).color(egui::Color32::from_rgb(243, 139, 168)))
             .on_hover_text("Remove all logs from memory")
             .clicked()
         {
@@ -168,7 +168,7 @@ pub fn render_console_panel(app: &mut TabletMapperApp, ui: &mut egui::Ui) {
             }
         }
 
-        if ui.button("📋 Copy Unfiltered Logs").clicked() {
+        if ui.button(format!("{} Copy Unfiltered Logs", egui_phosphor::regular::COPY)).clicked() {
             ui.output_mut(|o| o.commands.push(egui::OutputCommand::CopyText(full_log_text)));
         }
 

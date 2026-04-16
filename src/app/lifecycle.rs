@@ -95,6 +95,11 @@ impl TabletMapperApp {
 
         // Apply theme before shared state move
         crate::ui::theme::apply_theme(&_ctx, config.theme);
+        
+        // Initialize Phosphor icons
+        let mut fonts = eframe::egui::FontDefinitions::default();
+        egui_phosphor::add_to_fonts(&mut fonts, egui_phosphor::Variant::Regular);
+        _ctx.set_fonts(fonts);
 
         let shared = Arc::new(SharedState {
             config: RwLock::new(config),

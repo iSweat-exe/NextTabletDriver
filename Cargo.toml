@@ -20,7 +20,7 @@ rfd = "0.17.2"
 log = "0.4"
 chrono = "0.4"
 egui_extras = "0.33.3"
-egui-phosphor = "0.12"
+egui-phosphor = "0.11"
 crossbeam-channel = "0.5.15"
 include_dir = "0.7"
 tungstenite = { version = "0.29.0" }
