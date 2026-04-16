@@ -96,9 +96,23 @@ impl TabletMapperApp {
         // Apply theme before shared state move
         crate::ui::theme::apply_theme(&_ctx, config.theme);
         
-        // Initialize Phosphor icons
+        // Initialize Fonts & Icons
         let mut fonts = eframe::egui::FontDefinitions::default();
+
+        // 1. Add Phosphor icons
         egui_phosphor::add_to_fonts(&mut fonts, egui_phosphor::Variant::Regular);
+
+        // 2. Add Helvetica
+        fonts.font_data.insert(
+            "Helvetica".to_owned(),
+            std::sync::Arc::new(eframe::egui::FontData::from_static(include_bytes!("../../resources/fonts/Helvetica.ttf"))),
+        );
+
+        // 3. Set Helvetica as the primary proportional font
+        fonts.families.entry(eframe::egui::FontFamily::Proportional)
+            .or_default()
+            .insert(0, "Helvetica".to_owned());
+
         _ctx.set_fonts(fonts);
 
         let shared = Arc::new(SharedState {
