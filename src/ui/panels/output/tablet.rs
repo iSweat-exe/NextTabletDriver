@@ -127,11 +127,12 @@ pub fn render_tablet_section(app: &TabletMapperApp, ui: &mut egui::Ui, config: &
                 (points[0].y + points[3].y) / 2.0,
             );
             let galley = ui.fonts_mut(|f| {
-                f.layout_no_wrap(
-                    format!("{:.2}mm", config.active_area.h).replace(".", ","),
-                    font_id.clone(),
-                    color,
-                )
+                let text = format!("{:.2}", config.active_area.h)
+                    .trim_end_matches('0')
+                    .trim_end_matches('.')
+                    .replace(".", ",")
+                    + "mm";
+                f.layout_no_wrap(text, font_id.clone(), color)
             });
             ui.painter().add(egui::epaint::TextShape {
                 pos: left_mid
@@ -164,10 +165,15 @@ pub fn render_tablet_section(app: &TabletMapperApp, ui: &mut egui::Ui, config: &
                 (points[0].x + points[1].x) / 2.0,
                 (points[0].y + points[1].y) / 2.0,
             );
+            let text_w = format!("{:.2}", config.active_area.w)
+                .trim_end_matches('0')
+                .trim_end_matches('.')
+                .replace(".", ",")
+                + "mm";
             ui.painter().text(
                 top_mid + egui::vec2(5.0 * rot_rad.sin(), 5.0 * rot_rad.cos()),
                 egui::Align2::CENTER_TOP,
-                format!("{:.2}mm", config.active_area.w).replace(".", ","),
+                text_w,
                 font_id.clone(),
                 color,
             );

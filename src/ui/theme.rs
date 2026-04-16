@@ -154,7 +154,17 @@ pub fn ui_input_box(ui: &mut egui::Ui, label: &str, value: &mut f32, unit: &str)
 
                 // DragValue
                 ui.spacing_mut().item_spacing.x = 4.0;
-                let response = ui.add(egui::DragValue::new(value).speed(1.0).fixed_decimals(1));
+                let response = ui.add(
+                    egui::DragValue::new(value)
+                        .speed(0.1)
+                        .max_decimals(2)
+                        .custom_formatter(|val, _| {
+                            format!("{:.2}", val)
+                                .trim_end_matches('0')
+                                .trim_end_matches('.')
+                                .replace(".", ",")
+                        }),
+                );
                 if response.hovered() {
                     ui.output_mut(|o| o.cursor_icon = egui::CursorIcon::ResizeHorizontal);
                 }
@@ -248,7 +258,13 @@ pub fn ui_setting_row(ui: &mut egui::Ui, label: &str, value: &mut f32, unit: &st
                     let response = ui.add(
                         egui::DragValue::new(value)
                             .speed(0.1)
-                            .fixed_decimals(1)
+                            .max_decimals(2)
+                            .custom_formatter(|val, _| {
+                                format!("{:.2}", val)
+                                    .trim_end_matches('0')
+                                    .trim_end_matches('.')
+                                    .replace(".", ",")
+                            })
                             .clamp_existing_to_range(false),
                     );
                     if response.hovered() {
