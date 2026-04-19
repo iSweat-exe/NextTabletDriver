@@ -73,7 +73,7 @@ mod tests {
         assert_eq!(report.y, 772);
         assert_eq!(report.pressure, 5);
         assert_eq!(report.buttons, 1); // 0x02 is bit 0
-        assert_eq!(report.eraser, true); // 0x08 is eraser
+        assert!(report.eraser); // 0x08 is eraser
         assert_eq!(report.tilt_x, 10);
         assert_eq!(report.tilt_y, -10);
     }
