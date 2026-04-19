@@ -114,6 +114,13 @@ pub fn run_manager(
                 }
             }
 
+            // Drain stale packets from the HID buffer after initialization.
+            // The init sequence (feature/output reports) can leave response
+            // packets queued that would cause a cursor teleport if processed.
+            let mut drain_buf = [0u8; 64];
+            while device.read_timeout(&mut drain_buf, 10).unwrap_or(0) > 0 {}
+            pipeline.reset_relative();
+
             let mut buf = [0u8; 64];
             loop {
                 let hid_read_start = Instant::now();

@@ -76,6 +76,14 @@ impl Pipeline {
             return;
         }
 
+        // Only process packets that carry valid pen position data.
+        // Skip aux reports, tool identification, out-of-range, and other
+        // non-positional statuses — these should never move the cursor.
+        let status = data.status.as_str();
+        if !matches!(status, "Contact" | "Hover" | "Active") {
+            return;
+        }
+
         let now = Instant::now();
         let (max_w, max_h, max_p) = driver.get_specs();
         let (phys_w, phys_h) = driver.get_physical_specs();
@@ -108,7 +116,12 @@ impl Pipeline {
                     config.target_area.h,
                 );
 
-                if (screen_x - self.last_screen_x).abs() > 0.1
+                if self.last_screen_x < 0.0 || self.last_screen_y < 0.0 {
+                    // First packet after connection or pen re-entry:
+                    // record the position without injecting to avoid a cursor teleport.
+                    self.last_screen_x = screen_x;
+                    self.last_screen_y = screen_y;
+                } else if (screen_x - self.last_screen_x).abs() > 0.1
                     || (screen_y - self.last_screen_y).abs() > 0.1
                 {
                     injector.move_absolute(screen_x, screen_y, u, v);
