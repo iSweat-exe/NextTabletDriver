@@ -69,7 +69,7 @@ impl Pipeline {
         config: &MappingConfig,
         injector: &mut crate::engine::injector::Injector,
         filters: &mut crate::filters::FilterPipeline,
-        shared: &Arc<crate::engine::state::SharedState>,
+        #[allow(unused_variables)] shared: &Arc<crate::engine::state::SharedState>,
     ) {
         #[cfg(debug_assertions)]
         let pipeline_start = Instant::now();

@@ -11,6 +11,25 @@ struct ReleaseEntry {
 
 const RELEASES: &[ReleaseEntry] = &[
     ReleaseEntry {
+        version: "1.26.2004.01",
+        date: "20/04/2026",
+        additions: &[
+            "Add: 'Developer' debug tab for real-time pipeline telemetry and HID packet inspection",
+            "Add: Extensive support for new tablet drivers (Acepen, Bosto, Floogoo, Genius, Lifetec, Robotpen, Tenmoon, UC-Logic, ViewSonic, and numerous Wacom models)",
+        ],
+        removals: &["Remove: Support panel"],
+        fixes: &[
+            "Fix: Cursor teleportation bug occurring upon tablet connection",
+            "Fix: Input not registering at the exact [0, 0] coordinate",
+            "Fix: Pen hover distance detection (out-of-range) not properly clearing state on timeout",
+        ],
+        improvements: &[
+            "Improve: Complete refactoring and modularization of tablet driver parsers",
+            "Improve: Debugger UI responsiveness with optimized 16ms temporal throttling",
+            "Improve: Codebase maintainability through comprehensive comment auditing and cleanup",
+        ],
+    },
+    ReleaseEntry {
         version: "1.26.2103.02",
         date: "21/03/2026",
         additions: &[],
