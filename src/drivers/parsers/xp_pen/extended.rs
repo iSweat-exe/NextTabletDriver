@@ -105,9 +105,6 @@ impl ReportParser for XpPenGen2Parser {
             .map(|b| format!("{:02X}", b))
             .collect::<Vec<_>>()
             .join(" ");
-        if data[1] == 0xC0 {
-            return None;
-        }
         if data[1] == 0xF0 {
             return parse_aux(data, raw, 2);
         }
@@ -130,9 +127,6 @@ impl ReportParser for XpPenDeco03Parser {
             .map(|b| format!("{:02X}", b))
             .collect::<Vec<_>>()
             .join(" ");
-        if data[1] == 0xC0 {
-            return None;
-        }
         if data[1] == 0xF0 {
             return parse_aux(data, raw, 2);
         } // Wheel parsed as aux
@@ -155,9 +149,6 @@ impl ReportParser for XpPenOffsetPressureParser {
             .map(|b| format!("{:02X}", b))
             .collect::<Vec<_>>()
             .join(" ");
-        if data[1] == 0xC0 {
-            return None;
-        }
         if (data[1] & 0x10) != 0 {
             return parse_aux(data, raw, 2);
         }
@@ -181,9 +172,6 @@ impl ReportParser for XpPenOffsetAuxParser {
             .map(|b| format!("{:02X}", b))
             .collect::<Vec<_>>()
             .join(" ");
-        if data[1] == 0xC0 {
-            return None;
-        }
         if (data[1] & 0x20) != 0 {
             return parse_aux(data, raw, 4);
         }
@@ -203,9 +191,6 @@ impl ReportParser for XpPenParser {
             .map(|b| format!("{:02X}", b))
             .collect::<Vec<_>>()
             .join(" ");
-        if data[1] == 0xC0 {
-            return None;
-        }
         if (data[1] & 0x10) != 0 {
             return parse_aux(data, raw, 2);
         }
