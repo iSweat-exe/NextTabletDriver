@@ -10,10 +10,7 @@
 //!   using the `evdev` crate. This approach is universally compatible with
 //!   X11, Wayland, and XWayland — the kernel sees it as real hardware.
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// Windows Implementation
-// ═══════════════════════════════════════════════════════════════════════════════
-
+// Windows
 #[cfg(windows)]
 mod platform {
     use enigo::{Button, Coordinate, Direction, Enigo, Mouse, Settings};
@@ -58,7 +55,9 @@ mod platform {
         /// * `target_y` - Target Y coordinate in OS pixels.
         /// * `_u` / `_v` - Normalized UV coordinates (unused on Windows).
         pub fn move_absolute(&mut self, target_x: f32, target_y: f32, _u: f32, _v: f32) {
+            #[cfg(windows)]
             use windows_sys::Win32::Foundation::POINT;
+            #[cfg(windows)]
             use windows_sys::Win32::UI::WindowsAndMessaging::GetCursorPos;
             unsafe {
                 let mut current_pos = POINT { x: 0, y: 0 };
@@ -111,15 +110,13 @@ mod platform {
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// Linux Implementation — /dev/uinput Virtual Tablet
-// ═══════════════════════════════════════════════════════════════════════════════
-
+// Linux Implementation > /dev/uinput Virtual Tablet
 #[cfg(target_os = "linux")]
 mod platform {
     use evdev::{
+        uinput::VirtualDevice, // Ajout de VirtualDevice
         AbsInfo, AbsoluteAxisCode, AttributeSet, BusType, InputEvent, InputId, KeyCode,
-        RelativeAxisCode, UinputAbsSetup, uinput::VirtualDeviceBuilder,
+        RelativeAxisCode, UinputAbsSetup,
     };
 
     /// Maximum value for absolute axes (standard high-resolution range).
@@ -173,8 +170,8 @@ mod platform {
             tablet_keys.insert(KeyCode::BTN_STYLUS);
             tablet_keys.insert(KeyCode::BTN_STYLUS2);
 
-            let virtual_tablet = VirtualDeviceBuilder::new()
-                .expect("Failed to open /dev/uinput — is the uinput module loaded?")
+            let virtual_tablet = VirtualDevice::builder()
+                .expect("Failed to open /dev/uinput is the uinput module loaded?")
                 .name("NextTabletDriver Virtual Pen")
                 .input_id(InputId::new(BusType::BUS_USB, 0x0001, 0x0001, 1))
                 .with_absolute_axis(&UinputAbsSetup::new(
@@ -218,7 +215,7 @@ mod platform {
             rel_axes.insert(RelativeAxisCode::REL_X);
             rel_axes.insert(RelativeAxisCode::REL_Y);
 
-            let virtual_mouse = VirtualDeviceBuilder::new()
+            let virtual_mouse = VirtualDevice::builder()
                 .expect("Failed to open /dev/uinput for virtual mouse")
                 .name("NextTabletDriver Virtual Mouse")
                 .input_id(InputId::new(BusType::BUS_USB, 0x0001, 0x0002, 1))
@@ -255,10 +252,10 @@ mod platform {
             let abs_y = (v.clamp(0.0, 1.0) * ABS_MAX as f32) as i32;
 
             let events = [
-                InputEvent::new(evdev::EventType::ABSOLUTE, AbsoluteAxisCode::ABS_X.0, abs_x),
-                InputEvent::new(evdev::EventType::ABSOLUTE, AbsoluteAxisCode::ABS_Y.0, abs_y),
+                InputEvent::new(evdev::EventType::ABSOLUTE.0, AbsoluteAxisCode::ABS_X.0, abs_x),
+                InputEvent::new(evdev::EventType::ABSOLUTE.0, AbsoluteAxisCode::ABS_Y.0, abs_y),
                 // SYN_REPORT to flush the event packet
-                InputEvent::new(evdev::EventType::SYNCHRONIZATION, 0, 0),
+                InputEvent::new(evdev::EventType::SYNCHRONIZATION.0, 0, 0),
             ];
 
             if let Err(e) = self.virtual_tablet.emit(&events) {
@@ -280,9 +277,9 @@ mod platform {
 
             if ix != 0 || iy != 0 {
                 let events = [
-                    InputEvent::new(evdev::EventType::RELATIVE, RelativeAxisCode::REL_X.0, ix),
-                    InputEvent::new(evdev::EventType::RELATIVE, RelativeAxisCode::REL_Y.0, iy),
-                    InputEvent::new(evdev::EventType::SYNCHRONIZATION, 0, 0),
+                    InputEvent::new(evdev::EventType::RELATIVE.0, RelativeAxisCode::REL_X.0, ix),
+                    InputEvent::new(evdev::EventType::RELATIVE.0, RelativeAxisCode::REL_Y.0, iy),
+                    InputEvent::new(evdev::EventType::SYNCHRONIZATION.0, 0, 0),
                 ];
 
                 if let Err(e) = self.virtual_mouse.emit(&events) {
@@ -304,8 +301,8 @@ mod platform {
             let value = if is_down { 1 } else { 0 };
 
             let events = [
-                InputEvent::new(evdev::EventType::KEY, KeyCode::BTN_TOUCH.0, value),
-                InputEvent::new(evdev::EventType::SYNCHRONIZATION, 0, 0),
+                InputEvent::new(evdev::EventType::KEY.0, KeyCode::BTN_TOUCH.0, value),
+                InputEvent::new(evdev::EventType::SYNCHRONIZATION.0, 0, 0),
             ];
 
             if let Err(e) = self.virtual_tablet.emit(&events) {
@@ -314,8 +311,8 @@ mod platform {
 
             // BTN_LEFT on mouse device for apps that don't honor BTN_TOUCH
             let mouse_events = [
-                InputEvent::new(evdev::EventType::KEY, KeyCode::BTN_LEFT.0, value),
-                InputEvent::new(evdev::EventType::SYNCHRONIZATION, 0, 0),
+                InputEvent::new(evdev::EventType::KEY.0, KeyCode::BTN_LEFT.0, value),
+                InputEvent::new(evdev::EventType::SYNCHRONIZATION.0, 0, 0),
             ];
 
             if let Err(e) = self.virtual_mouse.emit(&mouse_events) {
@@ -327,8 +324,5 @@ mod platform {
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// Public re-export — unified cross-platform API
-// ═══════════════════════════════════════════════════════════════════════════════
-
+// Public re-export
 pub use platform::Injector;

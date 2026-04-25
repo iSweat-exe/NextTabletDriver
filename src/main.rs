@@ -11,6 +11,7 @@
 use eframe::egui;
 use next_tablet_driver::app::TabletMapperApp;
 use next_tablet_driver::logger;
+#[cfg(windows)]
 use windows_sys::Win32::System::LibraryLoader::{GetModuleHandleA, GetProcAddress};
 
 /// Adjusts the Windows system timer resolution to minimize input latency.
@@ -54,7 +55,7 @@ fn set_fast_timer(enable: u8) {
             let mut cur = 0;
 
             let _ = nt_query(&raw mut min, &raw mut max, &raw mut cur);
-            log::debug!(target: "Timer", "System Timer Resolution: Min={:.1}ms, Max={:.1}ms, Current={:.1}ms", 
+            log::debug!(target: "Timer", "System Timer Resolution: Min={:.1}ms, Max={:.1}ms, Current={:.1}ms",
                 f64::from(min) / 10000.0, f64::from(max) / 10000.0, f64::from(cur) / 10000.0);
             windows_sys::Win32::Media::timeBeginPeriod(1);
 
