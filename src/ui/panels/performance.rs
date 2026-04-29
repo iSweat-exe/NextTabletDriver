@@ -1,4 +1,4 @@
-use crate::engine::state::SharedState;
+use crate::engine::state::{LockResultExt, SharedState};
 use eframe::egui;
 use std::sync::Arc;
 
@@ -12,7 +12,7 @@ pub fn render_performance_panel(
     ui: &mut egui::Ui,
 ) -> bool {
     let (tablet_status, is_connected, x, y, pressure, tilt_x, tilt_y, raw_data) = {
-        let data = shared.tablet_data.read().unwrap();
+        let data = shared.tablet_data.read().ignore_poison();
         (
             data.status.clone(),
             data.is_connected,
@@ -25,8 +25,8 @@ pub fn render_performance_panel(
         )
     };
 
-    let stats = *shared.stats.read().unwrap();
-    let (max_w, max_h) = *shared.hardware_size.read().unwrap();
+    let stats = *shared.stats.read().ignore_poison();
+    let (max_w, max_h) = *shared.hardware_size.read().ignore_poison();
     let mut reset_requested = false;
 
     ui.add_space(10.0);

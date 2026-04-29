@@ -378,11 +378,12 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_config_serialization() {
+    fn test_config_serialization() -> Result<(), Box<dyn std::error::Error>> {
         let config = MappingConfig::default_test();
-        let json = serde_json::to_string(&config).unwrap();
-        let deserialized: MappingConfig = serde_json::from_str(&json).unwrap();
+        let json = serde_json::to_string(&config)?;
+        let deserialized: MappingConfig = serde_json::from_str(&json)?;
         assert_eq!(config, deserialized);
+        Ok(())
     }
 
     #[test]

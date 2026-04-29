@@ -203,14 +203,17 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_xp_pen_gen2() {
+    fn test_xp_pen_gen2() -> Result<(), Box<dyn std::error::Error>> {
         let parser = XpPenGen2Parser;
         let data: [u8; 14] = [
             0, 0xA2, 0x02, 0, 0x04, 0, 0x01, 0x00, 10, 20, 0x01, 0x03, 0, 0,
         ];
-        let report = parser.parse(&data).unwrap();
+        let report = parser
+            .parse(&data)
+            .ok_or("XP-Pen Gen2 parser failed to parse tablet packet")?;
         assert_eq!(report.status, "Contact");
         assert_eq!(report.x, 0xFFFF); // overflow u16 max clamped
         assert_eq!(report.buttons, 1);
+        Ok(())
     }
 }

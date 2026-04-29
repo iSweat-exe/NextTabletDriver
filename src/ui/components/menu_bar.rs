@@ -1,4 +1,5 @@
 use crate::app::state::{TabletMapperApp, ToastLevel};
+use crate::engine::state::LockResultExt;
 use eframe::egui;
 use std::sync::atomic::Ordering;
 
@@ -22,7 +23,8 @@ pub fn render_menu_bar(app: &mut TabletMapperApp, ctx: &egui::Context) {
                             match crate::settings::load_settings_from_file(&path) {
                                 Ok((cfg, corrections)) => {
                                     {
-                                        let mut shared_config = app.shared.config.write().unwrap();
+                                        let mut shared_config =
+                                            app.shared.config.write().ignore_poison();
                                         *shared_config = cfg.clone();
                                         app.shared.config_version.fetch_add(1, Ordering::SeqCst);
                                     }
@@ -78,7 +80,7 @@ pub fn render_menu_bar(app: &mut TabletMapperApp, ctx: &egui::Context) {
                             .add_filter("JSON", &["json"])
                             .save_file()
                         {
-                            let config = app.shared.config.read().unwrap().clone();
+                            let config = app.shared.config.read().ignore_poison().clone();
                             match crate::settings::save_to_path(&path, &config) {
                                 Ok(()) => {
                                     if let Some(name) = path.file_stem().and_then(|s| s.to_str()) {
@@ -109,7 +111,7 @@ pub fn render_menu_bar(app: &mut TabletMapperApp, ctx: &egui::Context) {
                     if ui.button("Reset to default").clicked() {
                         ui.close();
                         {
-                            let mut shared_config = app.shared.config.write().unwrap();
+                            let mut shared_config = app.shared.config.write().ignore_poison();
                             let theme = shared_config.theme;
                             let run_at_startup = shared_config.run_at_startup;
 
@@ -134,7 +136,7 @@ pub fn render_menu_bar(app: &mut TabletMapperApp, ctx: &egui::Context) {
                             .add_filter("JSON", &["json"])
                             .save_file()
                         {
-                            let config = app.shared.config.read().unwrap().clone();
+                            let config = app.shared.config.read().ignore_poison().clone();
                             match crate::settings::save_to_path(&path, &config) {
                                 Ok(()) => {
                                     app.push_toast(
@@ -159,7 +161,8 @@ pub fn render_menu_bar(app: &mut TabletMapperApp, ctx: &egui::Context) {
                         {
                             match crate::settings::load_settings_from_file(&path) {
                                 Ok((cfg, corrections)) => {
-                                    let mut shared_config = app.shared.config.write().unwrap();
+                                    let mut shared_config =
+                                        app.shared.config.write().ignore_poison();
                                     *shared_config = cfg;
                                     if !corrections.is_empty() {
                                         // Drop the write lock before pushing toast
@@ -199,7 +202,7 @@ pub fn render_menu_bar(app: &mut TabletMapperApp, ctx: &egui::Context) {
 }
 
 pub fn save_current_settings(app: &mut TabletMapperApp) {
-    let config = app.shared.config.read().unwrap().clone();
+    let config = app.shared.config.read().ignore_poison().clone();
 
     if let Some(ref path) = app.profile.path {
         // Save back to the loaded profile path

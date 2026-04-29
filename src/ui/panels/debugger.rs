@@ -1,10 +1,10 @@
-use crate::engine::state::SharedState;
+use crate::engine::state::{LockResultExt, SharedState};
 use eframe::egui;
 use std::sync::Arc;
 
 pub fn render_debugger_panel(shared: Arc<SharedState>, displayed_hz: f32, ui: &mut egui::Ui) {
-    let tablet_data = shared.tablet_data.read().unwrap();
-    let tablet_name = shared.tablet_name.read().unwrap();
+    let tablet_data = shared.tablet_data.read().ignore_poison();
+    let tablet_name = shared.tablet_name.read().ignore_poison();
     let is_detected = *tablet_name != "No Tablet Detected";
 
     let (max_x, max_y, max_p) = shared

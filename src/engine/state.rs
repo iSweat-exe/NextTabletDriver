@@ -5,10 +5,27 @@
 
 use crate::core::config::models::MappingConfig;
 use crate::drivers::TabletData;
-use std::sync::RwLock;
 use std::sync::atomic::AtomicU32;
 #[cfg(debug_assertions)]
 use std::sync::atomic::AtomicU64;
+use std::sync::{LockResult, RwLock};
+
+/// Extension trait to handle poisoned locks gracefully.
+pub trait LockResultExt<T> {
+    fn ignore_poison(self) -> T;
+}
+
+impl<T> LockResultExt<T> for LockResult<T> {
+    fn ignore_poison(self) -> T {
+        match self {
+            Ok(guard) => guard,
+            Err(poisoned) => {
+                log::error!(target: "State", "Lock poisoned! Another thread panicked while holding this lock. Recovering guard...");
+                poisoned.into_inner()
+            }
+        }
+    }
+}
 
 /// The central thread-safe state store for the application.
 ///

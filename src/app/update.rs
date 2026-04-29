@@ -5,6 +5,7 @@
 //! every frame to process events, update state, and render the user interface.
 
 use crate::app::state::{AppTab, TabletMapperApp, ToastLevel};
+use crate::engine::state::LockResultExt;
 use crate::ui::panels::console::render_console_panel;
 #[cfg(debug_assertions)]
 use crate::ui::panels::developer::render_developer_panel;
@@ -70,7 +71,7 @@ impl eframe::App for TabletMapperApp {
                 }
             }
 
-            let mut shared_data = self.shared.tablet_data.write().unwrap();
+            let mut shared_data = self.shared.tablet_data.write().ignore_poison();
             *shared_data = data;
 
             ctx.request_repaint();
@@ -88,7 +89,8 @@ impl eframe::App for TabletMapperApp {
         // Unsaved Changes Close Guard
         {
             let close_requested = ctx.input(|i| i.viewport().close_requested());
-            let config_snapshot = self.shared.config.read().unwrap().clone();
+            let config_snapshot: crate::core::config::models::MappingConfig =
+                self.shared.config.read().ignore_poison().clone();
             let is_dirty = self.profile.is_dirty(&config_snapshot);
 
             if close_requested && is_dirty && !self.show_close_confirm && !self.force_close {
@@ -137,7 +139,8 @@ impl eframe::App for TabletMapperApp {
         }
 
         // Clone config for diffing — UI mutates this copy, then we push back if changed
-        let mut config = self.shared.config.read().unwrap().clone();
+        let mut config: crate::core::config::models::MappingConfig =
+            self.shared.config.read().ignore_poison().clone();
         let initial_config = config.clone();
 
         // System Tray Minimize-to-Tray
@@ -223,7 +226,7 @@ impl eframe::App for TabletMapperApp {
                 crate::ui::theme::apply_theme(ctx, config.theme);
             }
             {
-                let mut shared_config = self.shared.config.write().unwrap();
+                let mut shared_config = self.shared.config.write().ignore_poison();
                 *shared_config = config.clone();
 
                 self.shared.config_version.fetch_add(1, Ordering::SeqCst);
@@ -298,7 +301,7 @@ impl eframe::App for TabletMapperApp {
                         }
 
                         ui.vertical_centered(|ui| {
-                            let name = self.shared.tablet_name.read().unwrap().clone();
+                            let name = self.shared.tablet_name.read().ignore_poison().clone();
                             ui.add_space(5.0);
                             ui.heading(
                                 egui::RichText::new(name).strong().extra_letter_spacing(1.5),

@@ -169,7 +169,8 @@ impl TabletMapperApp {
             .expect("Failed to load icon")
             .into_rgba8();
         let (width, height) = image.dimensions();
-        let icon = tray_icon::Icon::from_rgba(image.into_raw(), width, height).unwrap();
+        let icon = tray_icon::Icon::from_rgba(image.into_raw(), width, height)
+            .expect("Failed to create tray icon from RGBA data");
 
         let tray_icon = tray_icon::TrayIconBuilder::new()
             .with_icon(icon)

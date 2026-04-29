@@ -151,8 +151,8 @@ fn main() -> eframe::Result {
         std::env::consts::ARCH
     );
 
-    let icon_data =
-        eframe::icon_data::from_png_bytes(include_bytes!("../resources/icon.png")).unwrap();
+    let icon_data = eframe::icon_data::from_png_bytes(include_bytes!("../resources/icon.png"))
+        .expect("Critical error: Failed to load application icon from embedded resources");
 
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()

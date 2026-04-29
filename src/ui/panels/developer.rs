@@ -1,5 +1,6 @@
 use crate::app::state::TabletMapperApp;
 use crate::core::config::models::MappingConfig;
+use crate::engine::state::LockResultExt;
 use eframe::egui;
 use std::sync::atomic::Ordering;
 
@@ -66,7 +67,12 @@ pub fn render_developer_panel(
             let pipe_time =
                 app.shared.debug_pipeline_time_ns.load(Ordering::Relaxed) as f32 / 1000.0;
             let inject_count = app.shared.debug_inject_count.load(Ordering::Relaxed);
-            let stage = app.shared.debug_pipeline_stage.read().unwrap().clone();
+            let stage = app
+                .shared
+                .debug_pipeline_stage
+                .read()
+                .ignore_poison()
+                .clone();
 
             ui.horizontal(|ui| {
                 ui.label(egui::RichText::new("Status:").weak().size(12.0));
@@ -98,9 +104,9 @@ pub fn render_developer_panel(
 
             ui.add_space(10.0);
 
-            let last_uv = *app.shared.debug_last_uv.read().unwrap();
-            let fuv = *app.shared.debug_last_filtered_uv.read().unwrap();
-            let screen = *app.shared.debug_last_screen.read().unwrap();
+            let last_uv = *app.shared.debug_last_uv.read().ignore_poison();
+            let fuv = *app.shared.debug_last_filtered_uv.read().ignore_poison();
+            let screen = *app.shared.debug_last_screen.read().ignore_poison();
 
             egui::Frame::new()
                 .fill(ui.visuals().window_fill.gamma_multiply(0.4))
@@ -229,9 +235,9 @@ pub fn render_developer_panel(
         "Engine Memory State",
         egui_phosphor::regular::DATABASE,
         |ui| {
-            let tname = app.shared.tablet_name.read().unwrap().clone();
-            let tvid = *app.shared.tablet_vid.read().unwrap();
-            let tpid = *app.shared.tablet_pid.read().unwrap();
+            let tname = app.shared.tablet_name.read().ignore_poison().clone();
+            let tvid = *app.shared.tablet_vid.read().ignore_poison();
+            let tpid = *app.shared.tablet_pid.read().ignore_poison();
             let pcount = app.shared.packet_count.load(Ordering::Relaxed);
             let cver = app.shared.config_version.load(Ordering::Relaxed);
 

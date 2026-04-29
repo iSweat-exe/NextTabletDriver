@@ -1,13 +1,14 @@
 use crate::app::state::TabletMapperApp;
 use crate::core::config::models::MappingConfig;
+use crate::engine::state::LockResultExt;
 use crate::ui::theme::{ui_input_box, ui_section_header};
 use eframe::egui;
 
 pub fn render_tablet_section(app: &TabletMapperApp, ui: &mut egui::Ui, config: &mut MappingConfig) {
     ui_section_header(ui, "Tablet");
 
-    let (phys_w, phys_h) = *app.shared.physical_size.read().unwrap();
-    let tablet_data = app.shared.tablet_data.read().unwrap();
+    let (phys_w, phys_h) = *app.shared.physical_size.read().ignore_poison();
+    let tablet_data = app.shared.tablet_data.read().ignore_poison();
 
     egui::Frame::canvas(ui.style())
         .fill(crate::ui::theme::panel_bg(ui.visuals()))
@@ -217,7 +218,7 @@ pub fn render_tablet_section(app: &TabletMapperApp, ui: &mut egui::Ui, config: &
             }
 
             if tablet_data.is_connected {
-                let (max_w, max_h) = *app.shared.hardware_size.read().unwrap();
+                let (max_w, max_h) = *app.shared.hardware_size.read().ignore_poison();
                 let cx = offset_x + (tablet_data.x as f32 / max_w) * phys_w * scale;
                 let cy = offset_y + (tablet_data.y as f32 / max_h) * phys_h * scale;
                 if full_rect.contains(egui::pos2(cx, cy)) {

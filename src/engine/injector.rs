@@ -36,7 +36,8 @@ mod platform {
         /// Instantiates a new Injector using the default OS settings provided by Enigo.
         pub fn new() -> Self {
             Self {
-                enigo: Enigo::new(&Settings::default()).unwrap(),
+                enigo: Enigo::new(&Settings::default())
+                    .expect("Failed to initialize Enigo mouse injection backend"),
                 last_pressure_down: false,
                 remainder_x: 0.0,
                 remainder_y: 0.0,
@@ -114,9 +115,16 @@ mod platform {
 #[cfg(target_os = "linux")]
 mod platform {
     use evdev::{
+        AbsInfo,
+        AbsoluteAxisCode,
+        AttributeSet,
+        BusType,
+        InputEvent,
+        InputId,
+        KeyCode,
+        RelativeAxisCode,
+        UinputAbsSetup,
         uinput::VirtualDevice, // Ajout de VirtualDevice
-        AbsInfo, AbsoluteAxisCode, AttributeSet, BusType, InputEvent, InputId, KeyCode,
-        RelativeAxisCode, UinputAbsSetup,
     };
 
     /// Maximum value for absolute axes (standard high-resolution range).
@@ -252,8 +260,16 @@ mod platform {
             let abs_y = (v.clamp(0.0, 1.0) * ABS_MAX as f32) as i32;
 
             let events = [
-                InputEvent::new(evdev::EventType::ABSOLUTE.0, AbsoluteAxisCode::ABS_X.0, abs_x),
-                InputEvent::new(evdev::EventType::ABSOLUTE.0, AbsoluteAxisCode::ABS_Y.0, abs_y),
+                InputEvent::new(
+                    evdev::EventType::ABSOLUTE.0,
+                    AbsoluteAxisCode::ABS_X.0,
+                    abs_x,
+                ),
+                InputEvent::new(
+                    evdev::EventType::ABSOLUTE.0,
+                    AbsoluteAxisCode::ABS_Y.0,
+                    abs_y,
+                ),
                 // SYN_REPORT to flush the event packet
                 InputEvent::new(evdev::EventType::SYNCHRONIZATION.0, 0, 0),
             ];

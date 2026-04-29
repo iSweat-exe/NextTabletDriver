@@ -1,4 +1,5 @@
 use crate::app::state::TabletMapperApp;
+use crate::engine::state::LockResultExt;
 use eframe::egui;
 use std::sync::atomic::Ordering;
 
@@ -7,7 +8,7 @@ pub fn render_footer(
     ctx: &egui::Context,
     config: &mut crate::core::config::models::MappingConfig,
 ) {
-    let tablet_name = app.shared.tablet_name.read().unwrap().clone();
+    let tablet_name = app.shared.tablet_name.read().ignore_poison().clone();
     let profile_display = app.profile.display_name(config);
 
     egui::TopBottomPanel::bottom("footer")

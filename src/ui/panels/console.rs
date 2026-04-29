@@ -1,4 +1,5 @@
 use crate::app::state::TabletMapperApp;
+use crate::engine::state::LockResultExt;
 use eframe::egui;
 
 pub fn render_console_panel(app: &mut TabletMapperApp, ui: &mut egui::Ui) {
@@ -77,7 +78,7 @@ pub fn render_console_panel(app: &mut TabletMapperApp, ui: &mut egui::Ui) {
     ui.add_space(2.0);
 
     let (all_logs_count, filtered_logs, full_log_text) = {
-        let logs = crate::logger::LOG_BUFFER.read().unwrap();
+        let logs = crate::logger::LOG_BUFFER.read().ignore_poison();
         let search_lower = app.console_search.to_lowercase();
 
         let mut filtered: Vec<_> = logs
