@@ -44,10 +44,19 @@ pub fn render_menu_bar(app: &mut TabletMapperApp, ctx: &egui::Context, snapshot:
 
                     ui.separator();
 
-                    // TODO: Implement 'Presets' base on all profiles added by the user
-                    // With that the user can switch between profiles easily and without open a window or
-                    // without having to look for the profile file.
-                    // When the 'Presets' is hovered a side window should appear with all the profiles.
+                    ui.menu_button("Presets", |ui| {
+                        let profiles = crate::settings::list_profiles();
+                        if profiles.is_empty() {
+                            ui.label(egui::RichText::new("No presets found").weak().italics());
+                        } else {
+                            for (name, path) in profiles {
+                                if ui.button(name).clicked() {
+                                    ui.close();
+                                    app.load_profile_at_path(path);
+                                }
+                            }
+                        }
+                    });
                 });
                 ui.menu_button("Tablet", |ui| {
                     if ui.button("Open Debugger").clicked() {

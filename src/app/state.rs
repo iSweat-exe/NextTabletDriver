@@ -311,6 +311,44 @@ impl TabletMapperApp {
         });
     }
 
+    /// Loads a specific profile from a given path.
+    pub fn load_profile_at_path(&mut self, path: PathBuf) {
+        match crate::settings::load_settings_from_file(&path) {
+            Ok((cfg, corrections)) => {
+                self.apply_config(cfg.clone());
+
+                // Update profile state
+                if let Some(name) = path.file_stem().and_then(|s| s.to_str()) {
+                    self.profile.name = name.to_string();
+                }
+                self.profile.path = Some(path.clone());
+                self.profile.mark_saved(&cfg);
+
+                crate::settings::save_session_meta(&crate::settings::SessionMeta {
+                    profile_name: self.profile.name.clone(),
+                    profile_path: self.profile.path.clone(),
+                });
+
+                if !corrections.is_empty() {
+                    self.push_toast(
+                        format!(
+                            "Config repaired: {} field(s) reset to defaults",
+                            corrections.len()
+                        ),
+                        ToastLevel::Warning,
+                    );
+                }
+                self.push_toast(
+                    format!("Loaded profile: {}", self.profile.name),
+                    ToastLevel::Info,
+                );
+            }
+            Err(e) => {
+                self.push_toast(format!("Failed to load profile: {}", e), ToastLevel::Error);
+            }
+        }
+    }
+
     /// Prompts the user to load a settings file and applies it.
     pub fn load_settings(&mut self) {
         if let Some(path) = rfd::FileDialog::new()
@@ -318,37 +356,7 @@ impl TabletMapperApp {
             .add_filter("JSON", &["json"])
             .pick_file()
         {
-            match crate::settings::load_settings_from_file(&path) {
-                Ok((cfg, corrections)) => {
-                    self.apply_config(cfg.clone());
-
-                    // Update profile state
-                    if let Some(name) = path.file_stem().and_then(|s| s.to_str()) {
-                        self.profile.name = name.to_string();
-                    }
-                    self.profile.path = Some(path);
-                    self.profile.mark_saved(&cfg);
-
-                    crate::settings::save_session_meta(&crate::settings::SessionMeta {
-                        profile_name: self.profile.name.clone(),
-                        profile_path: self.profile.path.clone(),
-                    });
-
-                    if !corrections.is_empty() {
-                        self.push_toast(
-                            format!(
-                                "Config repaired: {} field(s) reset to defaults",
-                                corrections.len()
-                            ),
-                            ToastLevel::Warning,
-                        );
-                    }
-                    self.push_toast("Settings loaded successfully".to_string(), ToastLevel::Info);
-                }
-                Err(e) => {
-                    self.push_toast(format!("Failed to load settings: {}", e), ToastLevel::Error);
-                }
-            }
+            self.load_profile_at_path(path);
         }
     }
 
