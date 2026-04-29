@@ -97,7 +97,7 @@ pub fn save_settings(name: &str, config: &MappingConfig) -> Result<(), String> {
 pub fn save_last_session(config: &MappingConfig) -> Result<(), String> {
     let path = get_settings_dir().join("last_session.json");
     save_to_path(&path, config)?;
-    log::debug!(target: "Config", "Last session persistent state updated");
+    log::trace!(target: "Config", "Last session persistent state updated");
     Ok(())
 }
 

@@ -229,6 +229,7 @@ pub struct TabletMapperApp {
     // UI Local State
     pub displays: Vec<DisplayInfo>,
     pub last_update: Instant,
+    pub last_config_log: Instant,
     pub profile: ProfileState,
     pub active_tab: AppTab,
 

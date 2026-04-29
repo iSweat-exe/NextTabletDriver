@@ -16,7 +16,7 @@ use crate::ui::panels::release::render_release_panel;
 use crate::ui::panels::settings::render_settings_panel;
 use eframe::egui::{self, Shadow};
 use std::sync::atomic::Ordering;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 /// Duration before a toast notification auto-dismisses.
 const TOAST_DURATION: Duration = Duration::from_secs(3);
@@ -359,7 +359,11 @@ impl TabletMapperApp {
         initial: crate::core::config::models::MappingConfig,
     ) {
         if config != initial {
-            log::info!(target: "Config", "Configuration changed via UI");
+            let is_interacting = ctx.input(|i| i.pointer.any_down());
+            if !is_interacting && self.last_config_log.elapsed() > Duration::from_millis(1000) {
+                log::info!(target: "Config", "Configuration changed via UI");
+                self.last_config_log = Instant::now();
+            }
             if config.theme != initial.theme {
                 crate::ui::theme::apply_theme(ctx, config.theme);
             }

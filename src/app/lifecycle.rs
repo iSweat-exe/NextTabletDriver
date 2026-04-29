@@ -253,6 +253,7 @@ impl TabletMapperApp {
             shared,
             displays,
             last_update: Instant::now(),
+            last_config_log: Instant::now(),
             profile: {
                 // Restore profile identity from session_meta.json (silent, no toast)
                 let meta = load_session_meta();
