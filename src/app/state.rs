@@ -12,8 +12,84 @@ use std::time::Instant;
 
 use crate::app::autoupdate::UpdateStatus;
 use crate::drivers::TabletData;
-use crate::engine::state::SharedState;
+use crate::engine::state::{LockResultExt, SharedState};
 use crossbeam_channel::Receiver;
+
+/// An immutable, lock-free snapshot of the application state for a single UI frame.
+///
+/// This pattern solves three main issues:
+/// 1. **Contention**: Reduces the number of `read()` calls on `RwLock`s during a frame.
+/// 2. **Consistency**: Ensures all UI panels see exactly the same state for a given frame.
+/// 3. **Safety**: Handles poisoned locks once per frame at a central point.
+#[derive(Clone, Debug)]
+pub struct UiSnapshot {
+    pub tablet_name: String,
+    pub tablet_vid: u16,
+    pub tablet_pid: u16,
+    pub tablet_data: TabletData,
+    pub config: MappingConfig,
+    pub physical_size: (f32, f32),
+    pub hardware_size: (f32, f32),
+    pub stats: crate::drivers::DriverStats,
+    pub packet_count: u32,
+    pub is_first_run: bool,
+
+    // Debug-only instrumentation
+    #[cfg(debug_assertions)]
+    pub debug_pipeline_stage: String,
+    #[cfg(debug_assertions)]
+    pub debug_last_uv: (f32, f32),
+    #[cfg(debug_assertions)]
+    pub debug_last_filtered_uv: (f32, f32),
+    #[cfg(debug_assertions)]
+    pub debug_last_screen: (f32, f32),
+    #[cfg(debug_assertions)]
+    pub debug_inject_count: u32,
+    #[cfg(debug_assertions)]
+    pub debug_filter_time_ns: u64,
+    #[cfg(debug_assertions)]
+    pub debug_transform_time_ns: u64,
+    #[cfg(debug_assertions)]
+    pub debug_pipeline_time_ns: u64,
+}
+
+impl UiSnapshot {
+    /// Captures a complete state snapshot from the shared engine state.
+    /// This should be called exactly once at the beginning of every `update()` frame.
+    pub fn capture(shared: &SharedState) -> Self {
+        use std::sync::atomic::Ordering;
+
+        Self {
+            tablet_name: shared.tablet_name.read().ignore_poison().clone(),
+            tablet_vid: *shared.tablet_vid.read().ignore_poison(),
+            tablet_pid: *shared.tablet_pid.read().ignore_poison(),
+            tablet_data: shared.tablet_data.read().ignore_poison().clone(),
+            config: shared.config.read().ignore_poison().clone(),
+            physical_size: *shared.physical_size.read().ignore_poison(),
+            hardware_size: *shared.hardware_size.read().ignore_poison(),
+            stats: *shared.stats.read().ignore_poison(),
+            packet_count: shared.packet_count.load(Ordering::Relaxed),
+            is_first_run: *shared.is_first_run.read().ignore_poison(),
+
+            #[cfg(debug_assertions)]
+            debug_pipeline_stage: shared.debug_pipeline_stage.read().ignore_poison().clone(),
+            #[cfg(debug_assertions)]
+            debug_last_uv: *shared.debug_last_uv.read().ignore_poison(),
+            #[cfg(debug_assertions)]
+            debug_last_filtered_uv: *shared.debug_last_filtered_uv.read().ignore_poison(),
+            #[cfg(debug_assertions)]
+            debug_last_screen: *shared.debug_last_screen.read().ignore_poison(),
+            #[cfg(debug_assertions)]
+            debug_inject_count: shared.debug_inject_count.load(Ordering::Relaxed),
+            #[cfg(debug_assertions)]
+            debug_filter_time_ns: shared.debug_filter_time_ns.load(Ordering::Relaxed),
+            #[cfg(debug_assertions)]
+            debug_transform_time_ns: shared.debug_transform_time_ns.load(Ordering::Relaxed),
+            #[cfg(debug_assertions)]
+            debug_pipeline_time_ns: shared.debug_pipeline_time_ns.load(Ordering::Relaxed),
+        }
+    }
+}
 
 /// Represents the currently active tab in the main application window.
 ///

@@ -1,4 +1,4 @@
-use crate::app::state::TabletMapperApp;
+use crate::app::state::{TabletMapperApp, UiSnapshot};
 use crate::core::config::models::MappingConfig;
 use crate::ui::theme::{panel_border, ui_card, ui_input_box_u16_range};
 use eframe::egui;
@@ -7,6 +7,7 @@ pub fn render_pen_settings_panel(
     _app: &TabletMapperApp,
     ui: &mut egui::Ui,
     config: &mut MappingConfig,
+    _snapshot: &UiSnapshot,
 ) {
     ui.add_space(15.0);
 

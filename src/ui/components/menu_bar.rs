@@ -1,9 +1,9 @@
-use crate::app::state::{TabletMapperApp, ToastLevel};
+use crate::app::state::{TabletMapperApp, ToastLevel, UiSnapshot};
 use crate::engine::state::LockResultExt;
 use eframe::egui;
 use std::sync::atomic::Ordering;
 
-pub fn render_menu_bar(app: &mut TabletMapperApp, ctx: &egui::Context) {
+pub fn render_menu_bar(app: &mut TabletMapperApp, ctx: &egui::Context, snapshot: &UiSnapshot) {
     egui::TopBottomPanel::top("menu_bar")
         .frame(
             egui::Frame::new()
@@ -70,7 +70,7 @@ pub fn render_menu_bar(app: &mut TabletMapperApp, ctx: &egui::Context) {
 
                     if ui.button("Save Settings").clicked() {
                         ui.close();
-                        save_current_settings(app);
+                        save_current_settings(app, &snapshot.config);
                     }
 
                     if ui.button("Save Settings As...").clicked() {
@@ -80,7 +80,7 @@ pub fn render_menu_bar(app: &mut TabletMapperApp, ctx: &egui::Context) {
                             .add_filter("JSON", &["json"])
                             .save_file()
                         {
-                            let config = app.shared.config.read().ignore_poison().clone();
+                            let config = snapshot.config.clone();
                             match crate::settings::save_to_path(&path, &config) {
                                 Ok(()) => {
                                     if let Some(name) = path.file_stem().and_then(|s| s.to_str()) {
@@ -136,7 +136,7 @@ pub fn render_menu_bar(app: &mut TabletMapperApp, ctx: &egui::Context) {
                             .add_filter("JSON", &["json"])
                             .save_file()
                         {
-                            let config = app.shared.config.read().ignore_poison().clone();
+                            let config = snapshot.config.clone();
                             match crate::settings::save_to_path(&path, &config) {
                                 Ok(()) => {
                                     app.push_toast(
@@ -201,8 +201,11 @@ pub fn render_menu_bar(app: &mut TabletMapperApp, ctx: &egui::Context) {
         });
 }
 
-pub fn save_current_settings(app: &mut TabletMapperApp) {
-    let config = app.shared.config.read().ignore_poison().clone();
+pub fn save_current_settings(
+    app: &mut TabletMapperApp,
+    config: &crate::core::config::models::MappingConfig,
+) {
+    let config = config.clone();
 
     if let Some(ref path) = app.profile.path {
         // Save back to the loaded profile path

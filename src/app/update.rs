@@ -4,7 +4,7 @@
 //! `TabletMapperApp`. The `update` function defined here is called by egui
 //! every frame to process events, update state, and render the user interface.
 
-use crate::app::state::{AppTab, TabletMapperApp, ToastLevel};
+use crate::app::state::{AppTab, TabletMapperApp, ToastLevel, UiSnapshot};
 use crate::engine::state::LockResultExt;
 use crate::ui::panels::console::render_console_panel;
 #[cfg(debug_assertions)]
@@ -39,6 +39,9 @@ impl eframe::App for TabletMapperApp {
     /// repaints automatically when events are fired, but also enforces a minimum 1Hz
     /// refresh rate for passive status updates.
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        // 1. Capture snapshot for the entire frame
+        let snapshot = UiSnapshot::capture(&self.shared);
+
         // Shortcuts
         if ctx.input_mut(|i| {
             i.consume_shortcut(&egui::KeyboardShortcut::new(
@@ -46,7 +49,7 @@ impl eframe::App for TabletMapperApp {
                 egui::Key::S,
             ))
         }) {
-            crate::ui::components::menu_bar::save_current_settings(self);
+            crate::ui::components::menu_bar::save_current_settings(self, &snapshot.config);
         }
 
         // Drain pending tablet events, keeping only the latest
@@ -89,9 +92,7 @@ impl eframe::App for TabletMapperApp {
         // Unsaved Changes Close Guard
         {
             let close_requested = ctx.input(|i| i.viewport().close_requested());
-            let config_snapshot: crate::core::config::models::MappingConfig =
-                self.shared.config.read().ignore_poison().clone();
-            let is_dirty = self.profile.is_dirty(&config_snapshot);
+            let is_dirty = self.profile.is_dirty(&snapshot.config);
 
             if close_requested && is_dirty && !self.show_close_confirm && !self.force_close {
                 // Block the close and show the confirmation dialog
@@ -139,8 +140,7 @@ impl eframe::App for TabletMapperApp {
         }
 
         // Clone config for diffing — UI mutates this copy, then we push back if changed
-        let mut config: crate::core::config::models::MappingConfig =
-            self.shared.config.read().ignore_poison().clone();
+        let mut config = snapshot.config.clone();
         let initial_config = config.clone();
 
         // System Tray Minimize-to-Tray
@@ -176,26 +176,35 @@ impl eframe::App for TabletMapperApp {
             max_y = ay as f32;
         }
 
-        crate::ui::components::menu_bar::render_menu_bar(self, ctx);
+        crate::ui::components::menu_bar::render_menu_bar(self, ctx, &snapshot);
 
         crate::ui::components::tabs::render_tabs(self, ctx);
 
-        crate::ui::components::footer::render_footer(self, ctx, &mut config);
+        crate::ui::components::footer::render_footer(self, ctx, &mut config, &snapshot);
 
         egui::CentralPanel::default().show(ctx, |ui| match self.active_tab {
             AppTab::Output => {
                 egui::ScrollArea::vertical().show(ui, |ui| {
-                    render_output_panel(self, ui, &mut config, min_x, min_y, max_x, max_y);
+                    render_output_panel(
+                        self,
+                        ui,
+                        &mut config,
+                        &snapshot,
+                        min_x,
+                        min_y,
+                        max_x,
+                        max_y,
+                    );
                 });
             }
             AppTab::Filters => {
                 egui::ScrollArea::vertical().show(ui, |ui| {
-                    render_filters_panel(self, ui, &mut config);
+                    render_filters_panel(self, ui, &mut config, &snapshot);
                 });
             }
             AppTab::PenSettings => {
                 egui::ScrollArea::vertical().show(ui, |ui| {
-                    render_pen_settings_panel(self, ui, &mut config);
+                    render_pen_settings_panel(self, ui, &mut config, &snapshot);
                 });
             }
             AppTab::Console => {
@@ -203,7 +212,7 @@ impl eframe::App for TabletMapperApp {
             }
             AppTab::Settings => {
                 egui::ScrollArea::vertical().show(ui, |ui| {
-                    render_settings_panel(self, ui, &mut config);
+                    render_settings_panel(self, ui, &mut config, &snapshot);
                 });
             }
             AppTab::Release => {
@@ -214,7 +223,7 @@ impl eframe::App for TabletMapperApp {
             #[cfg(debug_assertions)]
             AppTab::Developer => {
                 egui::ScrollArea::vertical().show(ui, |ui| {
-                    render_developer_panel(self, ui, &config);
+                    render_developer_panel(self, ui, &snapshot);
                 });
             }
         });
@@ -301,15 +310,16 @@ impl eframe::App for TabletMapperApp {
                         }
 
                         ui.vertical_centered(|ui| {
-                            let name = self.shared.tablet_name.read().ignore_poison().clone();
                             ui.add_space(5.0);
                             ui.heading(
-                                egui::RichText::new(name).strong().extra_letter_spacing(1.5),
+                                egui::RichText::new(&snapshot.tablet_name)
+                                    .strong()
+                                    .extra_letter_spacing(1.5),
                             );
                         });
 
                         crate::ui::panels::debugger::render_debugger_panel(
-                            self.shared.clone(),
+                            &snapshot,
                             self.displayed_hz,
                             ui,
                         );
@@ -358,13 +368,14 @@ impl eframe::App for TabletMapperApp {
                         });
 
                         if crate::ui::panels::performance::render_performance_panel(
-                            self.shared.clone(),
+                            &snapshot,
                             self.displayed_hz,
                             self.ui_latency_ms,
                             self.min_ui_latency_ms,
                             self.max_ui_latency_ms,
                             self.avg_ui_latency_ms,
                             ui,
+                            self.shared.clone(),
                         ) {
                             self.min_ui_latency_ms = f32::MAX;
                             self.max_ui_latency_ms = 0.0;

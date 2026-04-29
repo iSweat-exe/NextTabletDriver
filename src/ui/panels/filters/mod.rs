@@ -1,7 +1,7 @@
 pub mod antichatter;
 pub mod stats;
 
-use crate::app::state::TabletMapperApp;
+use crate::app::state::{TabletMapperApp, UiSnapshot};
 use crate::core::config::models::MappingConfig;
 use crate::ui::theme::{panel_bg, panel_border};
 use eframe::egui;
@@ -10,6 +10,7 @@ pub fn render_filters_panel(
     app: &mut TabletMapperApp,
     ui: &mut egui::Ui,
     config: &mut MappingConfig,
+    snapshot: &UiSnapshot,
 ) {
     ui.add_space(5.0);
     ui.horizontal(|ui| {
@@ -60,7 +61,7 @@ pub fn render_filters_panel(
             ui.add_space(5.0);
             match app.selected_filter.as_str() {
                 "Devocub Antichatter" => antichatter::render_antichatter_settings(ui, config),
-                "HandSpeed WebSocket" => stats::render_stats_settings(app, ui, config),
+                "HandSpeed WebSocket" => stats::render_stats_settings(app, ui, config, snapshot),
                 _ => {
                     ui.centered_and_justified(|ui| {
                         ui.label("Select a filter to configure");

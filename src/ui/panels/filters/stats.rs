@@ -1,15 +1,15 @@
-use crate::app::state::TabletMapperApp;
+use crate::app::state::{TabletMapperApp, UiSnapshot};
 use crate::core::config::models::MappingConfig;
 use crate::ui::theme::{panel_border, ui_card, ui_input_box_u16};
 use eframe::egui;
 
-pub fn render_stats_settings(app: &TabletMapperApp, ui: &mut egui::Ui, config: &mut MappingConfig) {
-    let stats = app
-        .shared
-        .stats
-        .read()
-        .map(|g| *g)
-        .unwrap_or_else(|e| *e.into_inner());
+pub fn render_stats_settings(
+    app: &TabletMapperApp,
+    ui: &mut egui::Ui,
+    config: &mut MappingConfig,
+    snapshot: &UiSnapshot,
+) {
+    let stats = &snapshot.stats;
 
     ui.add_space(5.0);
 
