@@ -11,8 +11,8 @@ struct ReleaseEntry {
 
 const RELEASES: &[ReleaseEntry] = &[
     ReleaseEntry {
-        version: "1.26.0405.01",
-        date: "04/05/2026",
+        version: "1.26.0505.01",
+        date: "05/05/2026",
         additions: &[
             "Add: Robust auto-updater with versioning, progress tracking, and SHA verification",
             "Add: User presets options for customized configuration",
